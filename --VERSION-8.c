@@ -94,7 +94,8 @@ int main(void){
 					}else{
 						cadastraLivro(livro, &ppli, recolheDadosLivro(&codigo));
 						desenhaCabecalho();
-						printf("***CADASTRO DE LIVRO***\n\n");
+						printf("CADASTRO DE LEITOR-\n");
+						printf("-------------------\n\n");
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
 						printf(" LIVRO: %s\tCODIGO:%03i\n\n\n",livro[ppli-1].nome,livro[ppli-1].codigo);
@@ -125,6 +126,7 @@ int main(void){
 						system("pause");
 					}else{
 						printf("erro");
+						system("pause");
 					}
 					
 				break;
@@ -178,16 +180,17 @@ int main(void){
 }
 
 void desenhaCabecalho(void){// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
-	printf("***************************************************************************************\n");
-	printf("*******************************SISTEMA DA BIBLIOTECA***********************************\n");
-	printf("***************************************************************************************\n");
+	printf("---------------------------------------------------------------------------------------\n");
+	printf("-------------------------------SISTEMA DA BIBLIOTECA-----------------------------------\n");
+	printf("---------------------------------------------------------------------------------------\n");
 }
 
 struct Leitor recolheDadosLeitor(int *matricula){
 	struct Leitor leitor;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
-	printf("***CADASTRO DE LEITOR***\n\n");
+	printf("CADASTRO DE LEITOR-\n");
+	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LEITOR:");
 	fflush(stdin);
 	fgets(leitor.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
@@ -254,7 +257,7 @@ void realizarEmprestimo(struct Emprestimo emprestimo[], int	*qtdEmp, int *codEmp
 
 void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 	int i;
-	printf("-------------------------------CADASTRO DE LIVRO--------------------------------------\n\n");
+	printf("\n\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n\n");
 	printf(" COD                         LEITOR MATRICULA LIVRO                          COD.LIVRO\n");
 	printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 	for(i=0; i<qtdEmp; i++){
