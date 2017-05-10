@@ -78,10 +78,12 @@ int main(void){
 					}else{
 						cadastraLeitor(leitor, &pple, recolheDadosLeitor(&matricula));
 						desenhaCabecalho();
-						printf("***CADASTRO DE LEITOR***\n\n");
-						printf(" LEITOR CADASTRADO COM SUCESSO!\n\n");
+						printf("CADASTRO DE LEITOR-\n");
+						printf("-------------------\n\n");
 						fflush(stdin);
-						printf(" LEITOR: %s\tMATRICULA:%03i\n\n\n",leitor[pple-1].nome,leitor[pple-1].matricula);
+						printf(" LEITOR                         MATRICULA\n");
+						printf(" ------------------------------ ---------\n");
+						printf(" %30s %-9.08i\n",leitor[pple-1].nome,leitor[pple-1].matricula);
 						system("pause");//PAUSA O SISTEMA.
 					}
 				break;
@@ -94,11 +96,13 @@ int main(void){
 					}else{
 						cadastraLivro(livro, &ppli, recolheDadosLivro(&codigo));
 						desenhaCabecalho();
-						printf("CADASTRO DE LEITOR-\n");
+						printf("CADASTRO DE LIVRO-\n");
 						printf("-------------------\n\n");
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
-						printf(" LIVRO: %s\tCODIGO:%03i\n\n\n",livro[ppli-1].nome,livro[ppli-1].codigo);
+						printf(" LEITOR                         MATRICULA\n");
+						printf(" ------------------------------ ---------\n");
+						printf(" %30s %-9.08i\n",livro[ppli-1].nome,livro[ppli-1].codigo);
 						system("pause");//PAUSA O SISTEMA.
 					}
 				break;
@@ -211,7 +215,8 @@ struct Livro recolheDadosLivro(int *codigo){
 	struct Livro livro;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
-	printf("***CADASTRO DE LIVRO***\n\n");
+	printf("CADASTRO DE LIVRO-\n");
+	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LIVRO:");
 	fflush(stdin);
 	fgets(livro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
