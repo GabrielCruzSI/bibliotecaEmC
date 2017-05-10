@@ -1,4 +1,4 @@
-/********************************************************************************************************************                                                             
+/************************************************************************************************************                                                             
 ********AUTHOR: GABRIEL PEREIRA DA CRUZ***E-MAIL:GABRIEL.CRUZ116@GMAIL.COM***WHATSAPP:(61)9 9324-4898****************
 ********CURSO: SISTEMAS DE INFORMAÇÃO*****IES: UNIVERSIDADE CATÓLICA DE BRASÍLIA - UCB*******************************
 ********SEMESTRE: 4° SEMESTRE 1/2017******DATA DA ÚLTIMA MODIFICAÇÃO:07/03/2017**************************************
@@ -78,10 +78,12 @@ int main(void){
 					}else{
 						cadastraLeitor(leitor, &pple, recolheDadosLeitor(&matricula));
 						desenhaCabecalho();
-						printf("***CADASTRO DE LEITOR***\n\n");
-						printf(" LEITOR CADASTRADO COM SUCESSO!\n\n");
+						printf("CADASTRO DE LEITOR-\n");
+						printf("-------------------\n\n");
 						fflush(stdin);
-						printf(" LEITOR: %s\tMATRICULA:%03i\n\n\n",leitor[pple-1].nome,leitor[pple-1].matricula);
+						printf(" LEITOR                         MATRICULA\n");
+						printf(" ------------------------------ ---------\n");
+						printf(" %30s %-9.08i\n",leitor[pple-1].nome,leitor[pple-1].matricula);
 						system("pause");//PAUSA O SISTEMA.
 					}
 				break;
@@ -94,10 +96,13 @@ int main(void){
 					}else{
 						cadastraLivro(livro, &ppli, recolheDadosLivro(&codigo));
 						desenhaCabecalho();
-						printf("***CADASTRO DE LIVRO***\n\n");
+						printf("CADASTRO DE LIVRO-\n");
+						printf("-------------------\n\n");
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
-						printf(" LIVRO: %s\tCODIGO:%03i\n\n\n",livro[ppli-1].nome,livro[ppli-1].codigo);
+						printf(" LEITOR                         MATRICULA\n");
+						printf(" ------------------------------ ---------\n");
+						printf(" %30s %-9.08i\n",livro[ppli-1].nome,livro[ppli-1].codigo);
 						system("pause");//PAUSA O SISTEMA.
 					}
 				break;
@@ -125,6 +130,7 @@ int main(void){
 						system("pause");
 					}else{
 						printf("erro");
+						system("pause");
 					}
 					
 				break;
@@ -161,8 +167,7 @@ int main(void){
 				break;	
 				case 7:
 					system("cls");
-					
-					
+										
 				break;	
 				case 8:
 					
@@ -179,16 +184,17 @@ int main(void){
 }
 
 void desenhaCabecalho(void){// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
-	printf("***************************************************************************************\n");
-	printf("*******************************SISTEMA DA BIBLIOTECA***********************************\n");
-	printf("***************************************************************************************\n");
+	printf("---------------------------------------------------------------------------------------\n");
+	printf("-------------------------------SISTEMA DA BIBLIOTECA-----------------------------------\n");
+	printf("---------------------------------------------------------------------------------------\n");
 }
 
 struct Leitor recolheDadosLeitor(int *matricula){
 	struct Leitor leitor;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
-	printf("***CADASTRO DE LEITOR***\n\n");
+	printf("CADASTRO DE LEITOR-\n");
+	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LEITOR:");
 	fflush(stdin);
 	fgets(leitor.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
@@ -209,7 +215,8 @@ struct Livro recolheDadosLivro(int *codigo){
 	struct Livro livro;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
-	printf("***CADASTRO DE LIVRO***\n\n");
+	printf("CADASTRO DE LIVRO-\n");
+	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LIVRO:");
 	fflush(stdin);
 	fgets(livro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
@@ -255,6 +262,7 @@ void realizarEmprestimo(struct Emprestimo emprestimo[], int	*qtdEmp, int *codEmp
 
 void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 	int i;
+	printf("\n\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n\n");
 	printf(" COD                         LEITOR MATRICULA LIVRO                          COD.LIVRO\n");
 	printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 	for(i=0; i<qtdEmp; i++){
@@ -264,18 +272,20 @@ void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 
 void listarLivros(struct Livro livro[], int ppli){
 	int i;
-	printf(" LIVRO           COD.LIVRO\n\n");
+	printf(" LIVRO                          COD.LIVRO\n");
+	printf(" ------------------------------ ---------\n");
 	for(i=0;i<ppli;i++)
-		printf(" %-15s %-9.03i\n",livro[i].nome,livro[i].codigo);
+		printf(" %30s %-9.08i\n",livro[i].nome,livro[i].codigo);
 
 	printf("\n\n");
 }
 
 void listarLeitores(struct Leitor leitor[], int pple){
 	int i;
-	printf(" LEITOR           COD.LIVRO\n\n");
+	printf(" LEITOR                         MATRICULA\n");
+	printf(" ------------------------------ ---------\n");
 	for(i=0;i<pple;i++)
-		printf(" %-15s %-9.03i\n",leitor[i].nome,leitor[i].matricula);
+		printf(" %30s %-9.08i\n",leitor[i].nome,leitor[i].matricula);
 	
 	printf("\n\n");
 }
