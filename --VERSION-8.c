@@ -1,4 +1,4 @@
-/********************************************************************************************************************                                                             
+/***8.11111*********************************************************************************************************                                                             
 ********AUTHOR: GABRIEL PEREIRA DA CRUZ***E-MAIL:GABRIEL.CRUZ116@GMAIL.COM***WHATSAPP:(61)9 9324-4898****************
 ********CURSO: SISTEMAS DE INFORMAÇÃO*****IES: UNIVERSIDADE CATÓLICA DE BRASÍLIA - UCB*******************************
 ********SEMESTRE: 4° SEMESTRE 1/2017******DATA DA ÚLTIMA MODIFICAÇÃO:07/03/2017**************************************
@@ -161,8 +161,7 @@ int main(void){
 				break;	
 				case 7:
 					system("cls");
-					
-					
+										
 				break;	
 				case 8:
 					
@@ -264,18 +263,20 @@ void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 
 void listarLivros(struct Livro livro[], int ppli){
 	int i;
-	printf(" LIVRO           COD.LIVRO\n\n");
+	printf(" LIVRO                          COD.LIVRO\n");
+	printf(" ------------------------------ ---------\n");
 	for(i=0;i<ppli;i++)
-		printf(" %-15s %-9.03i\n",livro[i].nome,livro[i].codigo);
+		printf(" %30s %-9.08i\n",livro[i].nome,livro[i].codigo);
 
 	printf("\n\n");
 }
 
 void listarLeitores(struct Leitor leitor[], int pple){
 	int i;
-	printf(" LEITOR           COD.LIVRO\n\n");
+	printf(" LEITOR                         MATRICULA\n");
+	printf(" ------------------------------ ---------\n");
 	for(i=0;i<pple;i++)
-		printf(" %-15s %-9.03i\n",leitor[i].nome,leitor[i].matricula);
+		printf(" %30s %-9.08i\n",leitor[i].nome,leitor[i].matricula);
 	
 	printf("\n\n");
 }
