@@ -254,6 +254,7 @@ void realizarEmprestimo(struct Emprestimo emprestimo[], int	*qtdEmp, int *codEmp
 
 void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 	int i;
+	printf("-------------------------------CADASTRO DE LIVRO--------------------------------------\n\n");
 	printf(" COD                         LEITOR MATRICULA LIVRO                          COD.LIVRO\n");
 	printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 	for(i=0; i<qtdEmp; i++){
