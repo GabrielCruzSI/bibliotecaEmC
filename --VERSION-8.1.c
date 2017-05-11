@@ -23,7 +23,7 @@ typedef struct Leitor{
 
 typedef struct NoLeitor{
 	struct Leitor data;
-	struct Leitor *prox;
+	struct NoLeitor *prox;
 }NoLeitor;
 
 //Estrutras De Livros
@@ -34,7 +34,7 @@ typedef struct Livro {
 
 typedef struct NoLivro{
 	struct Livro data;
-	struct Livro *prox;
+	struct NoLivro *prox;
 }NoLivro;
 
 //Estrutras De Empréstimos
