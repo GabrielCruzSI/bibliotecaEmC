@@ -48,7 +48,7 @@ typedef struct Emprestimo{
 
 typedef struct NoEmprestimo{
 	struct Emprestimo data;
-	struct Emprestimo *prox;
+	struct NoEmprestimo *prox;
 }NoEmprestimo;
 
 
