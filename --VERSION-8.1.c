@@ -1,7 +1,7 @@
 /************************************************************************************************************                                                             
 ********AUTHOR: GABRIEL PEREIRA DA CRUZ***E-MAIL:GABRIEL.CRUZ116@GMAIL.COM***WHATSAPP:(61)9 9324-4898****************
 ********CURSO: SISTEMAS DE INFORMAÇÃO*****IES: UNIVERSIDADE CATÓLICA DE BRASÍLIA - UCB*******************************
-********SEMESTRE: 4° SEMESTRE 1/2017******DATA DA ÚLTIMA MODIFICAÇÃO:07/03/2017**************************************
+********SEMESTRE: 4° SEMESTRE 1/2017******DATA DA ÚLTIMA MODIFICAÇÃO:10/05/2017**************************************
 *********************************************************************************************************************
 ********OBJETIVO: CONSTRUIR UM SOFTWARE DE GESTÃO DE UMA BIBLIOTECA**************************************************
 ********FUNÇÕES: CADASTRAR.: LIVROS, LEITORES; LISTAR.: LIVROS, LEITORES; REALIZAR E CONSULTAR EMPRÉSTIMOS*********** 
@@ -15,18 +15,29 @@
 #define TS 30
 #define TV 15
 
-void desenhaCabecalho(void);// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
-
+//Estrutras De Leitores
 typedef struct Leitor{
 	char nome[TS];
 	int matricula;
 }Leitor;
 
+typedef struct NoLeitor{
+	struct Leitor data;
+	struct Leitor *prox;
+}NoLeitor;
+
+//Estrutras De Livros
 typedef struct Livro {
 	char nome[TS];
-	int codigo;
+	int codLivro;
 }Livro;
 
+typedef struct NoLivro{
+	struct Livro data;
+	struct Livro *prox;
+}NoLivro;
+
+//Estrutras De Empréstimos
 typedef struct Emprestimo{
 	int codigo;
 	int codigoLivro;
@@ -35,83 +46,111 @@ typedef struct Emprestimo{
 	char leitor[TS];
 }Emprestimo;
 
+typedef struct NoEmprestimo{
+	struct Emprestimo data;
+	struct Emprestimo *prox;
+}NoEmprestimo;
+
+
 //Declaração de Protótipos das Funções
 //====================================================================================================================//
+
+// Desenhar Cabeçalho Do Sistema
+void desenhaCabecalho(void);
+
 //Cadastrar Leitor
 struct Leitor recolheDadosLeitor(int *matricula);
-void cadastraLeitor(struct Leitor leitor[],int *pple, struct Leitor dadosLeitor);
+void cadastraLeitor(struct NoLeitor  *novoLeitor, struct NoLeitor  *listaDeLeitores,  struct Leitor dadosLeitor);
+
 //Cadastrar Livro
-struct Livro recolheDadosLivro(int *codigo);
-void cadastraLivro(struct Livro livro[],int *ppli, struct Livro dadosLivro);
+struct Livro recolheDadosLivro(int *codLivro);
+void cadastraLivro(struct NoLivro  *novoLivro, struct NoLivro  *listaDeLivros, struct Livro dadosLivro);
+
 //Realizar Emprestimo
-struct Emprestimo recolheDadosEmprestimo(struct Livro livro[], int ppli);
-void realizarEmprestimo(struct Emprestimo emprestimo[], int* cEm, int *empC, struct Emprestimo dadosEmprestimo, struct Livro livro[] , struct Leitor leitor[]);
+struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struct NoLivro *listaDeLivros);
+
+char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitor, int matricula, int codLivro, int op);
+
+void realizarEmprestimo(struct NoEmprestimo *listaDeEmprestimos,  struct Emprestimo dadosEmprestimo, int* codEmp);
+
 void consultarEmprestimos(struct Emprestimo emprestimo[], int cEm);
 
 //Listar Livros
-void listarLivros(struct Livro livro[], int ppli);
+//void listarLivros(struct Livro livro[], int ppli);
 //Listar Leitores
-void listarLeitores(struct Leitor leitor[], int pple);
+void listarLivros(struct NoLivro *listaDeLivros);
+
+//====================================================================================================================//
 
 int main(void){
-	int pple=0 /*Conta nº de Leitores*/,ppli=0 /*Conta nº de Livros*/,
-		qtdEmp=0 /*Conta nº de Emprestimos*/,	codEmp=1 /*Código de Empréstimo*/,
-		matricula=1,codigo=1, op=0;
-	struct Leitor leitor[TV];
-	struct Livro livro[TV];
-	struct Emprestimo emprestimo[100];
-		
+	
+	//Declaração de variáveis primitivas
+	   //Cont Cod Emprestimo  - Cont Matrícula - Cont Cod Livro - Variável Para Recolher Opção do Usuário 
+	int  codEmp=1, 				matricula=1,     codLivro=1,      op=0;
+	
+	//Declaração de variáveis Personalizadas
+	struct NoLeitor     *listaDeLeitores    = NULL, *novoLeitor     = NULL, *auxLeitor;
+	struct NoLivro      *listaDeLivros      = NULL, *novoLivro      = NULL, *auxLivro;
+	struct NoEmprestimo *listaDeEmprestimos = NULL, *novoEmprestimo = NULL;
+	
+	//Início do Ciclo DoWhile do Programa	
 	do{	
 		system("cls");
-		desenhaCabecalho();//CHAMA FUNÇÃO DESENHAR CABEÇALHO.
+		desenhaCabecalho();//Chama a função que desenha o cabeçalho
+		
 		printf("1-CADASTRAR LEITOR    3-REALIZAR EMPRESTIMO     5-LISTAR LIVROS     7-ALTERA   9-SAIR\n");
 		printf("2-CADASTRAR LIVRO     4-CONSULTAR EMPRESTIMOS   6-LISTAR LEITORES   8-EXCLUI\n\nOPCAO:");
 		scanf("%i",&op);
-		if(op==9)break;//FAZ UM COMPARAÇÃO.
-		else{
+		
+		if(op==9)break;//Analisa se o usuário deseja finalizar o programa.
+		
+		else{// Caso não deseje, dá procedimento ao programa
+		
 			switch(op){
 				case 1:
-					system("cls");//lIMPA A TELA.
-					if(pple>TV){//CHAMA FUNÇÃO CADASTRA LIVRO.
+					
+					system("cls");//limpa a Tela
+					
+					if((novoLeitor = (NoLeitor*) malloc(sizeof(struct NoLeitor))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Leitor  
 						printf(" TEMOS UM NUMERO MUITO GRANDE DE LEITORES!\nPOR FAVOR, VOLTE MES QUE VEM!");
-						system("pause");//PAUSA O SISTEMA.
+						system("pause");//Pausa o Sistema
 					}else{
-						cadastraLeitor(leitor, &pple, recolheDadosLeitor(&matricula));
+						cadastraLeitor(novoLeitor, listaDeLeitores, recolheDadosLeitor(&matricula));
 						desenhaCabecalho();
 						printf("CADASTRO DE LEITOR-\n");
 						printf("-------------------\n\n");
 						fflush(stdin);
 						printf(" LEITOR                         MATRICULA\n");
 						printf(" ------------------------------ ---------\n");
-						printf(" %30s %-9.08i\n",leitor[pple-1].nome,leitor[pple-1].matricula);
-						system("pause");//PAUSA O SISTEMA.
+						printf(" %30s %9.09i\n\n\n",novoLeitor->data.nome, novoLeitor->data.matricula);
+						system("pause");//Pausa o Sistema
 					}
 				break;
 					
 				case 2:
-					system("cls");//lIMPA A TELA.
-					if(ppli>TV){//CHAMA FUNÇÃO CADASTRA LIVRO.
+					system("cls");//limpa a Telas
+					if((novoLivro = (NoLivro*) malloc(sizeof(struct NoLivro))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Livro 
 						printf(" ESTOQUE MUITO CHEIO!\nPOR FAVOR, ESPERE AUMENTAR-MOS NOSSA ESTRUTURA!");
-						system("pause");//PAUSA O SISTEMA.						
+						system("pause");//Pausa o Sistema						
 					}else{
-						cadastraLivro(livro, &ppli, recolheDadosLivro(&codigo));
+						cadastraLivro(novoLivro, listaDeLivros, recolheDadosLivro(&codLivro));
 						desenhaCabecalho();
 						printf("CADASTRO DE LIVRO-\n");
 						printf("-------------------\n\n");
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
-						printf(" LEITOR                         MATRICULA\n");
+						printf(" LIVRO                          COD.LIVRO\n");
 						printf(" ------------------------------ ---------\n");
-						printf(" %30s %-9.08i\n",livro[ppli-1].nome,livro[ppli-1].codigo);
-						system("pause");//PAUSA O SISTEMA.
+						printf(" %30s %9.09i\n\n\n",novoLivro->data.nome, novoLivro->data.codLivro);
+						system("pause");//Pausa o Sistema.
 					}
 				break;
-				
+					
 				case 3:
 					system("cls");//lIMPA A TELA.
-					if((ppli<1)||(pple<1)){
+					if((listaDeLivros == NULL)||(listaDeLeitores == NULL)){
 						desenhaCabecalho();
-						printf("***ERRO: IMPOSSIVEL REALIZAR EMPRESTIMO***\n\n\n");
+						printf("---ERRO: IMPOSSIVEL REALIZAR EMPRESTIMO---\n\n\n");
 						printf(" O ERRO PODE SER CAUSADO POR:\n\n");
 						printf("   1)FALTA DE ALUNOS CONSTANDO NA BASE DE DADOS\n\n");
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
@@ -119,14 +158,15 @@ int main(void){
 						printf("\n\n");
 						system("pause");//PAUSA O SISTEMA.					
 					}else{
-						realizarEmprestimo(emprestimo, &qtdEmp, &codEmp, recolheDadosEmprestimo(livro,ppli), livro, leitor);
+						realizarEmprestimo(listaDeEmprestimos, recolheDadosEmprestimo(listaDeLeitores, listaDeLivros), &codEmp );
 					}
 				break;
-				
+				/*
 				case 4:
 					system("cls");
 					if(qtdEmp>0){
 						consultarEmprestimos(emprestimo, qtdEmp);
+						printf("\n\n");
 						system("pause");
 					}else{
 						printf("erro");
@@ -139,7 +179,7 @@ int main(void){
 					system("cls");
 					if(ppli<1){
 						desenhaCabecalho();
-						printf("***ERRO: IMPOSSIVEL LISTAR LIVROS***\n\n\n");
+						printf("---ERRO: IMPOSSIVEL LISTAR LIVROS---\n\n\n");
 						printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
 						system("pause");//PAUSA O SISTEMA.					
@@ -154,7 +194,7 @@ int main(void){
 					system("cls");
 					if(pple<1){
 						desenhaCabecalho();
-						printf("***ERRO: IMPOSSIVEL LISTAR LEITORES***\n\n\n");
+						printf("---ERRO: IMPOSSIVEL LISTAR LEITORES---\n\n\n");
 						printf(" NENHUM LEITOR CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
 						system("pause");//PAUSA O SISTEMA.					
@@ -171,15 +211,31 @@ int main(void){
 				break;	
 				case 8:
 					
-				break;			
+				break;	*/		
 				default:
 					system("cls");//lIMPA A TELA.
 					printf("OPCAO INVALIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-					system("pause");//PAUSA O SISTEMA.
+					system("pause");//Pausa o Sistema
 				break;
 			}	
 		}
 	}while(op!=9);	
+	
+	novoLeitor = listaDeLeitores;
+	while(novoLeitor != NULL){
+		auxLeitor = novoLeitor;
+		novoLeitor = novoLeitor->prox; 
+		free(auxLeitor);
+	}
+	
+	novoLivro = listaDeLivros;
+	while(novoLivro != NULL){
+		auxLivro = novoLivro;
+		novoLivro = novoLivro->prox; 
+		free(auxLivro);
+	}
+	
+	
 	return 0;
 }
 
@@ -205,13 +261,13 @@ struct Leitor recolheDadosLeitor(int *matricula){
 	return leitor;
 }
 
-void cadastraLeitor(struct Leitor leitor[],int *pple, struct Leitor dadosLeitor){
-	strcpy(leitor[(*pple)].nome, dadosLeitor.nome);
-	leitor[*pple].matricula = dadosLeitor.matricula;
-	(*pple)++;
+void cadastraLeitor(struct NoLeitor *novoLeitor, struct NoLeitor *listaDeLeitores, struct Leitor dadosLeitor){
+	novoLeitor->data = dadosLeitor;
+	novoLeitor->prox = listaDeLeitores;
+	listaDeLeitores = novoLeitor;
 }
 
-struct Livro recolheDadosLivro(int *codigo){
+struct Livro recolheDadosLivro(int *codLivro){
 	struct Livro livro;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
@@ -221,44 +277,81 @@ struct Livro recolheDadosLivro(int *codigo){
 	fflush(stdin);
 	fgets(livro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	livro.nome[strlen(livro.nome) - 1] = '\0';
-	livro.codigo = *codigo;
-	(*codigo)++;
+	livro.codLivro = *codLivro;
+	(*codLivro)++;
 	system("cls");	
 	return livro;
 }
 
-void cadastraLivro(struct Livro livro[],int *ppli, struct Livro dadosLivro){
-	strcpy(livro[(*ppli)].nome, dadosLivro.nome);
-	livro[*ppli].codigo = dadosLivro.codigo;
-	(*ppli)++;
+void cadastraLivro (struct NoLivro *novoLivro, struct NoLivro *listaDeLivros, struct Livro dadosLivro){
+	novoLivro->data = dadosLivro;
+	novoLivro->prox = listaDeLivros;//Todos os lugares que faço algo como isso DÁ WARNING
+	listaDeLivros = novoLivro;
 }
 
-struct Emprestimo recolheDadosEmprestimo(struct Livro livro[], int ppli){
+char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores,int matricula,int codLivro,int op){
+	
+	struct NoLivro  *nomeLivroAtual;
+	struct NoLeitor *nomeLeitorAtual;
+	
+	switch(op){
+		case 1:
+			nomeLivroAtual = listaDeLivros;
+			while( (nomeLivroAtual->data.codLivro) != codLivro ){
+				nomeLivroAtual = nomeLivroAtual->prox;
+			}
+		
+			return nomeLivroAtual->data.nome;
+		break;
+		
+		case 2:
+			nomeLeitorAtual = listaDeLeitores;
+			while( (nomeLeitorAtual->data.matricula) != matricula ){
+				nomeLeitorAtual = nomeLeitorAtual->prox;
+			}
+			return nomeLeitorAtual->data.nome;
+		break;
+		
+	}	
+}
+
+struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struct NoLivro *listaDeLivros){
 	struct Emprestimo dadosEmprestimo;
 	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
 	desenhaCabecalho();
-	printf("***EMPRESTIMO***\n\n");
+	
+	printf("---EMPRESTIMO---\n\n");
 	printf(" DIGITE SUA MATRICULA: ");
 	scanf("%i",&dadosEmprestimo.matricula);
+	
+	strcpy(dadosEmprestimo.leitor, retornaNome(listaDeLivros, listaDeLeitores, (dadosEmprestimo.matricula), 0 ,2));
+	
 	system("cls");//PAUSA O SISTEMA.
 	desenhaCabecalho();
-	printf("***EMPRESTIMO***\n\n");
-	listarLivros(livro,ppli);
-	//system("pause");//PAUSA O SISTEMA.
+	printf("---EMPRESTIMO---\n\n");
+	listarLivros(listaDeLivros);
+	
 	printf(" DIGITE O CODIGO DO LIVRO: ");
 	scanf("%i",&dadosEmprestimo.codigoLivro);
+	
+	strcpy(dadosEmprestimo.livroEmp , retornaNome(listaDeLivros, listaDeLeitores, 0, (dadosEmprestimo.codigoLivro) ,1)); 
+	
 	return dadosEmprestimo;
 }
 
-void realizarEmprestimo(struct Emprestimo emprestimo[], int	*qtdEmp, int *codEmp, struct Emprestimo dadosEmprestimo, struct Livro livro[], struct Leitor leitor[]){
-	emprestimo[(*qtdEmp)].matricula = dadosEmprestimo.matricula;
-	emprestimo[(*qtdEmp)].codigoLivro = dadosEmprestimo.codigoLivro;
-	emprestimo[(*qtdEmp)].codigo = *codEmp;
-	strcpy(emprestimo[(*qtdEmp)].livroEmp, livro[(dadosEmprestimo.codigoLivro - 1)].nome); 
-	strcpy(emprestimo[(*qtdEmp)].leitor, leitor[(dadosEmprestimo.matricula - 1)].nome); 
-	(*qtdEmp)++;
+void realizarEmprestimo(struct NoEmprestimo *listaDeEmprestimos,  struct Emprestimo dadosEmprestimo, int* codEmp){
+	
+	listaDeEmprestimos->data = dadosEmprestimo;
+	//emprestimo[(*qtdEmp)].matricula = dadosEmprestimo.matricula;
+	//emprestimo[(*qtdEmp)].codigoLivro = dadosEmprestimo.codigoLivro;
+	listaDeEmprestimos->data.codigo = *codEmp;
+	//strcpy(emprestimo[(*qtdEmp)].livroEmp, livro[(dadosEmprestimo.codigoLivro - 1)].nome); 
+	//strcpy(emprestimo[(*qtdEmp)].leitor, leitor[(dadosEmprestimo.matricula - 1)].nome); 
 	(*codEmp)++;	
 }
+
+/* =============================================================================PAREI AQUI!!!!!!!!
+
 
 void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 	int i;
@@ -266,26 +359,30 @@ void consultarEmprestimos(struct Emprestimo emprestimo[], int qtdEmp){
 	printf(" COD                         LEITOR MATRICULA LIVRO                          COD.LIVRO\n");
 	printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 	for(i=0; i<qtdEmp; i++){
-		printf(" %3.3i %30s %9.8i %30s %9.8i\n ", emprestimo[i].codigo, emprestimo[i].leitor, emprestimo[i].matricula, emprestimo[i].livroEmp, emprestimo[i].codigoLivro);
+		printf(" %3.03i %30s %9.09i %30s %9.09i\n", emprestimo[i].codigo, emprestimo[i].leitor, emprestimo[i].matricula, emprestimo[i].livroEmp, emprestimo[i].codigoLivro);
 	}
 }
-
-void listarLivros(struct Livro livro[], int ppli){
-	int i;
+*/
+void listarLivros(struct NoLivro *listaDeLivros){
+	struct NoLivro *livroAtual;
+	
+	livroAtual = listaDeLivros;
 	printf(" LIVRO                          COD.LIVRO\n");
 	printf(" ------------------------------ ---------\n");
-	for(i=0;i<ppli;i++)
-		printf(" %30s %-9.08i\n",livro[i].nome,livro[i].codigo);
-
+	while(livroAtual != NULL){
+		printf(" %30s %9.09i\n\n\n",livroAtual->data.nome, livroAtual->data.codLivro);
+		livroAtual = livroAtual->prox;
+	}
 	printf("\n\n");
 }
-
+/*
 void listarLeitores(struct Leitor leitor[], int pple){
 	int i;
 	printf(" LEITOR                         MATRICULA\n");
 	printf(" ------------------------------ ---------\n");
 	for(i=0;i<pple;i++)
-		printf(" %30s %-9.08i\n",leitor[i].nome,leitor[i].matricula);
+		printf(" %30s %9.09i\n",leitor[i].nome,leitor[i].matricula);
 	
 	printf("\n\n");
 }
+*/
