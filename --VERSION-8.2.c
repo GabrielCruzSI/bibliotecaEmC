@@ -1,11 +1,12 @@
-/************************************************************************************************************                                                             
-********AUTHOR: GABRIEL PEREIRA DA CRUZ***E-MAIL:GABRIEL.CRUZ116@GMAIL.COM***WHATSAPP:(61)9 9583-0718****************
-********CURSO: SISTEMAS DE INFORMAÇÃO*****IES: UNIVERSIDADE CATÓLICA DE BRASÍLIA - UCB*******************************
-********SEMESTRE: 4° SEMESTRE 1/2017******DATA DA ÚLTIMA MODIFICAÇÃO:11/05/2017**************************************
-*********************************************************************************************************************
-********OBJETIVO: CONSTRUIR UM SOFTWARE DE GESTÃO DE UMA BIBLIOTECA**************************************************
-********FUNÇÕES: CADASTRAR.: LIVROS, LEITORES; LISTAR.: LIVROS, LEITORES; REALIZAR E CONSULTAR EMPRÉSTIMOS*********** 
-*********************************************************************************************************************
+/*                                            
+*	AUTHOR: GABRIEL PEREIRA DA CRUZ --- E-MAIL:gabriel.cruz116@gmail.com 	   --- WHATSAPP:(61)9 9583-0718
+*	CURSO: SISTEMAS DE INFORMAÇÃO   --- IES: UNIVERSIDADE CATÓLICA DE BRASÍLIA --- UCB
+*	SEMESTRE: 4° SEMESTRE 1/2017    --- DATA DA ÚLTIMA MODIFICAÇÃO:12/05/2017
+*
+*	OBJETIVO: CONSTRUIR UM SOFTWARE DE GESTÃO DE UMA BIBLIOTECA
+*
+*	FUNÇÕES: CADASTRAR.: LIVROS - LEITORES - | LISTAR.: LIVROS - LEITORES | REALIZAR E CONSULTAR EMPRÉSTIMOS
+*
 */
 
 #include <stdio.h>
@@ -13,7 +14,6 @@
 #include <string.h>
 
 #define TS 30
-#define TV 15
 
 //Estrutras De Leitores
 typedef struct Leitor{
@@ -69,12 +69,14 @@ void cadastraLivro(struct NoLivro  **novoLivro, struct NoLivro  **listaDeLivros,
 //Realizar Emprestimo
 struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struct NoLivro *listaDeLivros, int *codEmp );
 char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitor, int matricula, int codLivro, int op);
-/*TA COM BUG(CONSERTAR)*/
 void realizarEmprestimo(struct NoEmprestimo **listaDeEmprestimos, struct NoEmprestimo **novoEmprestimo, struct Emprestimo dadosEmprestimo);
+
+//Consultar Emprestimo
 void consultarEmprestimos(struct NoEmprestimo *listaDeEmprestimos);
 
 //Listar Livros
 void listarLivros(struct NoLivro *listaDeLivros);
+
 //Listar Leitores
 void listarLeitores(struct NoLeitor *listaDeLeitores);
 
@@ -93,7 +95,7 @@ int main(void){
 	
 	//Início do Ciclo DoWhile do Programa	
 	do{	
-		system("cls");
+		system("cls");//limpa a Tela
 		desenhaCabecalho();//Chama a função que desenha o cabeçalho
 		
 		printf("1-CADASTRAR LEITOR    3-REALIZAR EMPRESTIMO     5-LISTAR LIVROS     7-ALTERA   9-SAIR\n");
@@ -122,15 +124,15 @@ int main(void){
 						printf(" LEITOR                         MATRICULA\n");
 						printf(" ------------------------------ ---------\n");
 						printf(" %-30s %9.09i\n\n\n",novoLeitor->data.nome, novoLeitor->data.matricula);
-						system("pause");//Pausa o Sistema
+						system("pause");
 					}
 				break;
 					
 				case 2://Cadastra Livro
-					system("cls");//limpa a Telas
+					system("cls");
 					if((novoLivro = (NoLivro*) malloc(sizeof(struct NoLivro))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Livro 
 						printf(" ESTOQUE MUITO CHEIO!\nPOR FAVOR, ESPERE AUMENTAR-MOS NOSSA ESTRUTURA!");
-						system("pause");//Pausa o Sistema						
+						system("pause");						
 					}else{
 						cadastraLivro(&novoLivro, &listaDeLivros, recolheDadosLivro(&codLivro));
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
@@ -143,12 +145,12 @@ int main(void){
 
 						printf(" ------------------------------ ---------\n");
 						printf(" %-30s %9.09i\n\n\n",novoLivro->data.nome, novoLivro->data.codLivro);
-						system("pause");//Pausa o Sistema.
+						system("pause");
 					}
 				break;
 					
 				case 3://Realiza Empréstimo
-					system("cls");//lIMPA A TELA.
+					system("cls");
 					if(((listaDeLivros == NULL)||(listaDeLeitores == NULL))){
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						printf("---ERRO: IMPOSSIVEL REALIZAR EMPRESTIMO---\n\n\n");
@@ -157,11 +159,13 @@ int main(void){
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
 						printf(" OBS: CONSERTE O ERRO, E TENTE NOVAMENTE!\n");
 						printf("\n\n");
-						system("pause");//PAUSA O SISTEMA.					
+						system("pause");				
 					}else{
 							novoEmprestimo = (NoEmprestimo*) malloc(sizeof(struct NoEmprestimo));
 							if(novoEmprestimo == NULL ){
-								printf("Vacilo1!!!");
+								desenhaCabecalho();//Chama a função que desenha o cabeçalho
+								printf("---FALHA: MEMÓRIA PODE ESTAR CHEIA! TENTE NOVAMENTE. ---\n\n\n");
+								printf("\n\n");
 								system("pause");
 							}else{
 								realizarEmprestimo(&listaDeEmprestimos, &novoEmprestimo, recolheDadosEmprestimo(listaDeLeitores, listaDeLivros, &codEmp ));
@@ -190,7 +194,7 @@ int main(void){
 						printf("---ERRO: IMPOSSIVEL LISTAR LIVROS---\n\n\n");
 						printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
-						system("pause");//PAUSA O SISTEMA.					
+						system("pause");					
 					}else{
 						desenhaCabecalho();
 						listarLivros(listaDeLivros);
@@ -205,7 +209,7 @@ int main(void){
 						printf("---ERRO: IMPOSSIVEL LISTAR LEITORES---\n\n\n");
 						printf(" NENHUM LEITOR CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
-						system("pause");//PAUSA O SISTEMA.					
+						system("pause");					
 					}else{
 						desenhaCabecalho();
 						listarLeitores(listaDeLeitores);
@@ -222,14 +226,16 @@ int main(void){
 					
 				break;	*/		
 				default:
-					system("cls");//lIMPA A TELA.
+					system("cls");
 					printf("OPCAO INVALIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-					system("pause");//Pausa o Sistema
+					system("pause");
 				break;
 			}	
 		}
 	}while(op!=9);	
 	
+	//===================================================================================================
+	//Esses caras (1, 2, 3 ) Servem para liberar a memória alocada para cada lista;(DISPOSIÇÃO TEMPORÁRIA)
 	novoLeitor = listaDeLeitores;
 	while(novoLeitor != NULL){
 		auxLeitor = novoLeitor;
@@ -250,7 +256,7 @@ int main(void){
 		novoEmprestimo = novoEmprestimo->prox; 
 		free(auxEmprestimo);
 	}
-	
+	//====================================================================================================
 	
 	return 0;
 }
@@ -262,13 +268,15 @@ void desenhaCabecalho(void){// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
 }
 
 struct Leitor recolheDadosLeitor(int *matricula){
+
 	struct Leitor leitor;
-	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
+	fflush(stdin);//Limpa o buffer do teclado
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
+
 	printf("CADASTRO DE LEITOR-\n");
 	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LEITOR:");
-	fflush(stdin);
+	fflush(stdin);//Limpa o buffer do teclado
 	fgets(leitor.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	leitor.nome[strlen(leitor.nome) - 1] = '\0';
 	leitor.matricula = *matricula;
@@ -278,6 +286,7 @@ struct Leitor recolheDadosLeitor(int *matricula){
 }
 
 void cadastraLeitor(struct NoLeitor **novoLeitor, struct NoLeitor **listaDeLeitores, struct Leitor dadosLeitor){
+
 	(*novoLeitor)->data = dadosLeitor;//Copia dados da estrutura dadasLeitor para o ponteiro novoLeitor
 	(*novoLeitor)->prox = *listaDeLeitores;//Aponta o campo prox do ponteiro novoLeitor para a onde o ponteiro da Lista esta apontando
 	*listaDeLeitores = *novoLeitor;//faz a lista apontar para o novoLeitor
@@ -285,13 +294,15 @@ void cadastraLeitor(struct NoLeitor **novoLeitor, struct NoLeitor **listaDeLeito
 }
 
 struct Livro recolheDadosLivro(int *codLivro){
+	
 	struct Livro livro;
-	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
+	fflush(stdin);//Limpa o buffer do teclado
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
+
 	printf("CADASTRO DE LIVRO-\n");
 	printf("-------------------\n\n");
 	printf(" DIGITE O NOME DO LIVRO:");
-	fflush(stdin);
+	fflush(stdin);//Limpa o buffer do teclado
 	fgets(livro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	livro.nome[strlen(livro.nome) - 1] = '\0';
 	livro.codLivro = *codLivro;
@@ -301,6 +312,7 @@ struct Livro recolheDadosLivro(int *codLivro){
 }
 
 void cadastraLivro (struct NoLivro **novoLivro, struct NoLivro **listaDeLivros, struct Livro dadosLivro){
+	
 	(*novoLivro)->data = dadosLivro;//Copia dados da estrutura dadasLivro para o ponteiro novoLivro
 	(*novoLivro)->prox = *listaDeLivros;//Aponta o campo prox do ponteiro novoLivro para a onde o ponteiro da Lista esta apontando
 	*listaDeLivros = *novoLivro;//faz a lista apontar para o novoLivro
@@ -308,7 +320,9 @@ void cadastraLivro (struct NoLivro **novoLivro, struct NoLivro **listaDeLivros, 
 }
 
 char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores,int matricula,int codLivro,int op){
-	fflush(stdin);
+
+	fflush(stdin);//Limpa o buffer do teclado
+	
 	//Declaração de ponteiros para auxiliar na tarefa
 	struct NoLivro  *nomeLivroAtual;
 	struct NoLeitor *nomeLeitorAtual;
@@ -335,9 +349,10 @@ char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitore
 }
 
 struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struct NoLivro *listaDeLivros, int* codEmp){
+
 	struct Emprestimo dadosEmprestimo;
-	fflush(stdin);//LIMPA O BUFFER DO TECLADO.
-	desenhaCabecalho();//
+	fflush(stdin);//Limpa o buffer do teclado.
+	desenhaCabecalho();//Chama a função que desenha o cabeçalho
 	
 	printf("---EMPRESTIMO---\n\n");
 	printf(" DIGITE SUA MATRICULA: ");
@@ -346,7 +361,7 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
 	strcpy(dadosEmprestimo.leitor, retornaNome(listaDeLivros, listaDeLeitores, (dadosEmprestimo.matricula), 0 ,2));
 	
-	system("cls");//PAUSA O SISTEMA.
+	system("cls");
 	desenhaCabecalho();
 	printf("---EMPRESTIMO---\n\n");
 	listarLivros(listaDeLivros);
@@ -371,6 +386,7 @@ void realizarEmprestimo(struct NoEmprestimo **listaDeEmprestimos, struct NoEmpre
 
 /* =============================================================================PAREI AQUI!!!!!!!!*/
 void consultarEmprestimos(struct NoEmprestimo *listaDeEmprestimos){
+	
 	struct NoEmprestimo *emprestimoAtual;//Cria um ponteiro para auxiliar na tarefa
 	
 	emprestimoAtual = listaDeEmprestimos;//o ponteiro auxiliar aponta para onde a lista está apontando
@@ -385,6 +401,7 @@ void consultarEmprestimos(struct NoEmprestimo *listaDeEmprestimos){
 }
 
 void listarLivros(struct NoLivro *listaDeLivros){//Função para listar os livros
+
 	struct NoLivro *livroAtual;//Cria um ponteiro para auxiliar na tarefa
 	
 	livroAtual = listaDeLivros;//o ponteiro auxiliar aponta para onde a lista está apontando
@@ -398,6 +415,7 @@ void listarLivros(struct NoLivro *listaDeLivros){//Função para listar os livros
 }
 
 void listarLeitores(struct NoLeitor *listaDeLeitores){//Função para listar os livros
+
 	struct NoLeitor *leitorAtual;//Cria um ponteiro para auxiliar na tarefa
 	
 	leitorAtual = listaDeLeitores;//o ponteiro auxiliar aponta para onde a lista está apontando
