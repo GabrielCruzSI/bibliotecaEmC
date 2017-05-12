@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>//Biblioteca para configurar os caracteres latinos
 
 #define TS 30
 
@@ -93,6 +94,9 @@ int main(void){
 	struct NoLivro      *listaDeLivros      = NULL, *novoLivro      = NULL, *auxLivro	  ;
 	struct NoEmprestimo *listaDeEmprestimos = NULL, *novoEmprestimo = NULL, *auxEmprestimo;
 	
+	//Configuração de Caracteres para 'UTF-8' (Permite o usuo de acentos no programa)
+	setlocale(LC_ALL, "Portuguese");
+	
 	//Início do Ciclo DoWhile do Programa	
 	do{	
 		system("cls");//limpa a Tela
@@ -113,7 +117,7 @@ int main(void){
 					system("cls");//limpa a Tela
 					
 					if((novoLeitor = (NoLeitor*) malloc(sizeof(struct NoLeitor))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Leitor  
-						printf(" TEMOS UM NUMERO MUITO GRANDE DE LEITORES!\nPOR FAVOR, VOLTE MES QUE VEM!");
+						printf(" TEMOS UM NÚMERO MUITO GRANDE DE LEITORES!\nPOR FAVOR, VOLTE MÊS QUE VEM!");
 						system("pause");//Pausa o Sistema
 					}else{
 						cadastraLeitor(&novoLeitor, &listaDeLeitores, recolheDadosLeitor(&matricula));
@@ -121,7 +125,7 @@ int main(void){
 						printf("CADASTRO DE LEITOR-\n");
 						printf("-------------------\n\n");
 						fflush(stdin);
-						printf(" LEITOR                         MATRICULA\n");
+						printf(" LEITOR                         MATRÍCULA\n");
 						printf(" ------------------------------ ---------\n");
 						printf(" %-30s %9.09i\n\n\n",novoLeitor->data.nome, novoLeitor->data.matricula);
 						system("pause");
@@ -153,7 +157,7 @@ int main(void){
 					system("cls");
 					if(((listaDeLivros == NULL)||(listaDeLeitores == NULL))){
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
-						printf("---ERRO: IMPOSSIVEL REALIZAR EMPRESTIMO---\n\n\n");
+						printf("---ERRO: IMPOSSÍVEL REALIZAR EMPRÉSTIMO---\n\n\n");
 						printf(" O ERRO PODE SER CAUSADO POR:\n\n");
 						printf("   1)FALTA DE ALUNOS CONSTANDO NA BASE DE DADOS\n\n");
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
@@ -191,7 +195,7 @@ int main(void){
 					system("cls");
 					if( listaDeLivros == NULL ){
 						desenhaCabecalho();
-						printf("---ERRO: IMPOSSIVEL LISTAR LIVROS---\n\n\n");
+						printf("---ERRO: IMPOSSÍVEL LISTAR LIVROS---\n\n\n");
 						printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
 						system("pause");					
@@ -206,7 +210,7 @@ int main(void){
 					system("cls");
 					if( listaDeLeitores == NULL ){
 						desenhaCabecalho();
-						printf("---ERRO: IMPOSSIVEL LISTAR LEITORES---\n\n\n");
+						printf("---ERRO: IMPOSSÍVEL LISTAR LEITORES---\n\n\n");
 						printf(" NENHUM LEITOR CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
 						system("pause");					
@@ -227,7 +231,7 @@ int main(void){
 				break;	*/		
 				default:
 					system("cls");
-					printf("OPCAO INVALIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
+					printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
 					system("pause");
 				break;
 			}	
@@ -354,8 +358,8 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 	fflush(stdin);//Limpa o buffer do teclado.
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
 	
-	printf("---EMPRESTIMO---\n\n");
-	printf(" DIGITE SUA MATRICULA: ");
+	printf("---EMPRÉSTIMO---\n\n");
+	printf(" DIGITE SUA MATRÍCULA: ");
 	scanf("%i",&dadosEmprestimo.matricula);
 
 	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
@@ -363,7 +367,7 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 	
 	system("cls");
 	desenhaCabecalho();
-	printf("---EMPRESTIMO---\n\n");
+	printf("---EMPRÉSTIMO---\n\n");
 	listarLivros(listaDeLivros);
 	printf(" DIGITE O CODIGO DO LIVRO: ");
 	scanf("%i",&dadosEmprestimo.codigoLivro);
@@ -391,7 +395,7 @@ void consultarEmprestimos(struct NoEmprestimo *listaDeEmprestimos){
 	
 	emprestimoAtual = listaDeEmprestimos;//o ponteiro auxiliar aponta para onde a lista está apontando
 	printf("\n\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n\n");
-	printf(" COD                         LEITOR MATRICULA LIVRO                          COD.LIVRO\n");
+	printf(" COD                         LEITOR MATRÍCULA LIVRO                          COD.LIVRO\n");
 	printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 	while( emprestimoAtual != NULL ){
 		printf(" %3.03i %30s %9.09i %30s %9.09i\n", emprestimoAtual->data.codigo, emprestimoAtual->data.leitor, emprestimoAtual->data.matricula, emprestimoAtual->data.livroEmp, emprestimoAtual->data.codigoLivro);
