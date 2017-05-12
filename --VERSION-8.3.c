@@ -72,7 +72,7 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitor, int matricula, int codLivro, int op);
 void realizarEmprestimo(struct NoEmprestimo **listaDeEmprestimos, struct NoEmprestimo **novoEmprestimo, struct Emprestimo dadosEmprestimo);
 
-//Consultar Emprestimo
+//Realizar Consulta
 void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores, int indice);
 
 //Listar Livros
