@@ -14,7 +14,18 @@
 #include <string.h>
 #include <locale.h>//Biblioteca para configurar os caracteres latinos
 
+/* Ajuste das funçôes específicas aos OS */
+#ifdef __unix__ 
+#define LIMPA_TELA system("clear")
+
+#elif defined (_WIN32) || defined (WIN32) 
+#define LIMPA_TELA system("cls")
+#endif
+#define PAUSE system("pause")
+
 #define TS 30
+
+
 
 //Estrutras De Leitores
 typedef struct Leitor{
@@ -59,6 +70,9 @@ typedef struct NoEmprestimo{
 // Desenhar Cabeçalho Do Sistema
 void desenhaCabecalho(void);
 
+//Desenha Subcabeçalhos do Sistema
+void imprimeSubcabecalho(int sessao);
+
 //Cadastrar Leitor
 struct Leitor recolheDadosLeitor(int *matricula);
 void cadastraLeitor(struct NoLeitor  **novoLeitor, struct NoLeitor  **listaDeLeitores,  struct Leitor dadosLeitor);
@@ -72,14 +86,17 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 char *retornaNome(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitor, int matricula, int codLivro, int op);
 void realizarEmprestimo(struct NoEmprestimo **listaDeEmprestimos, struct NoEmprestimo **novoEmprestimo, struct Emprestimo dadosEmprestimo);
 
-//Realizar Consulta
-void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores, int indice);
-
 //Listar Livros
 void listarLivros(struct NoLivro *listaDeLivros);
 
 //Listar Leitores
 void listarLeitores(struct NoLeitor *listaDeLeitores);
+
+//Realizar Consulta
+void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores, int indice);
+
+//Realizar Alteração
+void realizarAlteracao(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores, int indice);
 
 //====================================================================================================================//
 
@@ -99,7 +116,7 @@ int main(void){
 	
 	//Início do Ciclo DoWhile do Programa	
 	do{	
-		system("cls");//limpa a Tela
+		LIMPA_TELA;//limpa a Tela
 		desenhaCabecalho();//Chama a função que desenha o cabeçalho
 		
 		printf("1-CADASTRAR LEITOR    3-LISTAR LEITORES     5-REALIZAR EMPRESTIMO     7-ALTERA   9-SAIR\n");
@@ -114,78 +131,72 @@ int main(void){
 			switch(op){
 				case 1://Cadastra Leitor
 					
-					system("cls");//limpa a Tela
+					LIMPA_TELA;//limpa a Tela
 					
 					if((novoLeitor = (NoLeitor*) malloc(sizeof(struct NoLeitor))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Leitor  
 						printf(" TEMOS UM NÚMERO MUITO GRANDE DE LEITORES!\nPOR FAVOR, VOLTE MÊS QUE VEM!");
-						system("pause");//Pausa o Sistema
+						PAUSE;//Pausa o Sistema
 					}else{
 						cadastraLeitor(&novoLeitor, &listaDeLeitores, recolheDadosLeitor(&matricula));
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
-						printf("CADASTRO DE LEITOR\n");
-						printf("------------------\n\n");
+						imprimeSubcabecalho(1);
 						printf(" LEITOR CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
-						printf(" LEITOR                         MATRÍCULA\n");
-						printf(" ------------------------------ ---------\n");
+						imprimeSubcabecalho(3);
 						printf(" %-30s %9.09i\n\n\n",novoLeitor->data.nome, novoLeitor->data.matricula);
-						system("pause");
+						PAUSE;
 					}
 				break;
 					
 				case 2://Cadastra Livro
-					system("cls");
+					LIMPA_TELA;
 					if((novoLivro = (NoLivro*) malloc(sizeof(struct NoLivro))) == NULL){//Analiza Se Foi Alocado Corretamente Um Espaço Para O Novo Livro 
 						printf(" ESTOQUE MUITO CHEIO!\nPOR FAVOR, ESPERE AUMENTAR-MOS NOSSA ESTRUTURA!");
-						system("pause");						
+						PAUSE;						
 					}else{
 						cadastraLivro(&novoLivro, &listaDeLivros, recolheDadosLivro(&codLivro));
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
-						printf("CADASTRO DE LIVRO\n");
-						printf("-----------------\n\n");
+						imprimeSubcabecalho(4);
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						fflush(stdin);
-						printf(" LIVRO                          COD.LIVRO\n");
-
-
-						printf(" ------------------------------ ---------\n");
+						imprimeSubcabecalho(6);
 						printf(" %-30s %9.09i\n\n\n",novoLivro->data.nome, novoLivro->data.codLivro);
-						system("pause");
+						PAUSE;
 					}
 				break;
 					
 				case 3://Lista Leitores
-					system("cls");
+					LIMPA_TELA;
 						if( listaDeLeitores == NULL ){
 							desenhaCabecalho();
 							printf("---ERRO: IMPOSSÍVEL LISTAR LEITORES---\n\n\n");
 							printf(" NENHUM LEITOR CADASTRADO ATE O MOMENTO!\n\n");
 							printf("\n\n");
-							system("pause");					
+							PAUSE;					
 						}else{
 							desenhaCabecalho();
 							listarLeitores(listaDeLeitores);
-							system("pause");
+							PAUSE;
 						}
 				break;
 			
 				case 4://Lista Livros
-					system("cls");
+					LIMPA_TELA;
 					if( listaDeLivros == NULL ){
 						desenhaCabecalho();
 						printf("---ERRO: IMPOSSÍVEL LISTAR LIVROS---\n\n\n");
 						printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 						printf("\n\n");
-						system("pause");					
+						PAUSE;			
 					}else{
 						desenhaCabecalho();
 						listarLivros(listaDeLivros);
-						system("pause");
+						PAUSE;
 					}					
 				break;
 				
 				case 5://Realiza Empréstimo
-					system("cls");
+					LIMPA_TELA;
 					if(((listaDeLivros == NULL)||(listaDeLeitores == NULL))){
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						printf("---ERRO: IMPOSSÍVEL REALIZAR EMPRÉSTIMO---\n\n\n");
@@ -194,62 +205,61 @@ int main(void){
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
 						printf(" OBS: CONSERTE O ERRO, E TENTE NOVAMENTE!\n");
 						printf("\n\n");
-						system("pause");				
+						PAUSE;				
 					}else{
 							novoEmprestimo = (NoEmprestimo*) malloc(sizeof(struct NoEmprestimo));
 							if(novoEmprestimo == NULL ){
 								desenhaCabecalho();//Chama a função que desenha o cabeçalho
 								printf("---FALHA: MEMÓRIA PODE ESTAR CHEIA! TENTE NOVAMENTE. ---\n\n\n");
 								printf("\n\n");
-								system("pause");
+								PAUSE;
 							}else{
 								realizarEmprestimo(&listaDeEmprestimos, &novoEmprestimo, recolheDadosEmprestimo(listaDeLeitores, listaDeLivros, &codEmp ));
-								system("cls");
+								LIMPA_TELA;
 								desenhaCabecalho();//Chama a função que desenha o cabeçalho
-								printf("EMPRESTIMO\n");
-								printf("----------\n\n");
-								printf(" COD                         LEITOR MATRÍCULA LIVRO                          COD.LIVRO\n");
-								printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
+								imprimeSubcabecalho(7);
+								imprimeSubcabecalho(8);
 								printf(" %3.03i %30s %9.09i %30s %9.09i\n\n", novoEmprestimo->data.codigo, novoEmprestimo->data.leitor, novoEmprestimo->data.matricula, novoEmprestimo->data.livroEmp, novoEmprestimo->data.codigoLivro);
-								system("pause");
+								PAUSE;
 							}
 							
 					}
 				break;
 				
 				case 6://Realizar Consulta
-					system("cls");
+					LIMPA_TELA;
 					desenhaCabecalho();
+					imprimeSubcabecalho(9);
 					printf("1-CONSULTAR LIVRO    2-CONSULTAR LEITOR    3-CONSULTAR EMPRESTIMO    4-CANCELAR OPERAÇÃO\n\nOPCAO:");
 					scanf("%i", &opcao);
 					switch(opcao){
 						case 1:
 							if(listaDeLivros != NULL){
-								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, 1);
-								system("pause");
+								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, opcao);
+								PAUSE;
 							}else{
 								printf("erro");
-								system("pause");
+								PAUSE;
 							}
 						break;
 							
 						case 2:
 							if(listaDeLeitores != NULL){
-								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, 2);
-								system("pause");
+								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, opcao);
+								PAUSE;
 							}else{
 								printf("erro");
-								system("pause");
+								PAUSE;
 							}	
 						break;
 						
 						case 3:
 							if(listaDeEmprestimos != NULL){
-								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, 3);
-								system("pause");
+								realizarConsulta(listaDeEmprestimos, listaDeLivros, listaDeLeitores, opcao);
+								PAUSE;
 							}else{
 								printf("erro");
-								system("pause");
+								PAUSE;
 							}					
 						break;
 						
@@ -258,26 +268,59 @@ int main(void){
 						break;
 						
 						default:
-							system("cls");
+							LIMPA_TELA;
 							printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-							system("pause");
+							PAUSE;
 						
 					}
-					
-					
+
 				break;	
-					/*
-				case 7:
-					system("cls");
+					
+				case 7://Realizar Alteração
+					LIMPA_TELA;
+					desenhaCabecalho();
+					printf("1-ALTERAR LIVRO    2-ALTERAR LEITOR    3-CANCELAR OPERAÇÃO\n\nOPCAO:");
+					scanf("%i", &opcao);
+					switch(opcao){
+						case 1:
+							if(listaDeLivros != NULL){
+								realizarAlteracao(listaDeLivros, listaDeLeitores, 1);
+								PAUSE;
+							}else{
+								printf("erro");
+								PAUSE;
+							}
+						break;
+							
+						case 2:
+							if(listaDeLeitores != NULL){
+								realizarAlteracao(listaDeLivros, listaDeLeitores, 2);
+								PAUSE;
+							}else{
+								printf("erro");
+								PAUSE;
+							}	
+						break;
+						
+						case 3:
+												
+						break;
+						
+						default:
+							LIMPA_TELA;
+							printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
+							PAUSE;
+						
+					}
 										
 				break;	
 				case 8:
 					
-				break;	*/		
+				break;		
 				default:
-					system("cls");
+					LIMPA_TELA;
 					printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-					system("pause");
+					PAUSE;
 				break;
 			}	
 		}
@@ -319,18 +362,16 @@ void desenhaCabecalho(void){// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
 struct Leitor recolheDadosLeitor(int *matricula){
 
 	struct Leitor leitor;
-	fflush(stdin);//Limpa o buffer do teclado
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
 
-	printf("CADASTRO DE LEITOR\n");
-	printf("------------------\n\n");
+	imprimeSubcabecalho(1);
 	printf(" DIGITE O NOME DO LEITOR:");
 	fflush(stdin);//Limpa o buffer do teclado
 	fgets(leitor.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	leitor.nome[strlen(leitor.nome) - 1] = '\0';
 	leitor.matricula = *matricula;
 	(*matricula)++;//Incrementa o numero da matricula
-	system("cls");	
+	LIMPA_TELA;	
 	return leitor;
 }
 
@@ -342,21 +383,21 @@ void cadastraLeitor(struct NoLeitor **novoLeitor, struct NoLeitor **listaDeLeito
 	//listarLeitores(*listaDeLeitores); Deixei aqui só caso eu queira testar se esta adicionando mesmo na lista
 }
 
+
 struct Livro recolheDadosLivro(int *codLivro){
 	
 	struct Livro livro;
 	fflush(stdin);//Limpa o buffer do teclado
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
 
-	printf("CADASTRO DE LIVRO\n");
-	printf("-----------------\n\n");
+	imprimeSubcabecalho(4);
 	printf(" DIGITE O NOME DO LIVRO:");
 	fflush(stdin);//Limpa o buffer do teclado
 	fgets(livro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	livro.nome[strlen(livro.nome) - 1] = '\0';
 	livro.codLivro = *codLivro;
 	(*codLivro)++;//Incrementa o numero do CodLivro
-	system("cls");	
+	LIMPA_TELA;	
 	return livro;
 }
 
@@ -403,18 +444,16 @@ struct Emprestimo recolheDadosEmprestimo(struct NoLeitor *listaDeLeitores, struc
 	fflush(stdin);//Limpa o buffer do teclado.
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
 	
-	printf("EMPRÉSTIMO\n");
-	printf("----------\n\n");
+	imprimeSubcabecalho(7);
 	printf(" DIGITE SUA MATRÍCULA: ");
 	scanf("%i",&dadosEmprestimo.matricula);
 
 	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
 	strcpy(dadosEmprestimo.leitor, retornaNome(listaDeLivros, listaDeLeitores, (dadosEmprestimo.matricula), 0 ,2));
 	
-	system("cls");
+	LIMPA_TELA;
 	desenhaCabecalho();
-	printf("EMPRÉSTIMO\n");
-	printf("----------\n\n");
+	imprimeSubcabecalho(7);
 	listarLivros(listaDeLivros);
 	printf(" DIGITE O CODIGO DO LIVRO: ");
 	scanf("%i",&dadosEmprestimo.codigoLivro);
@@ -435,15 +474,13 @@ void realizarEmprestimo(struct NoEmprestimo **listaDeEmprestimos, struct NoEmpre
 	*listaDeEmprestimos = *novoEmprestimo;//faz a lista apontar para o novoLivro
 }
 
-/* =============================================================================PAREI AQUI!!!!!!!!*/
-
 void listarLivros(struct NoLivro *listaDeLivros){//Função para listar os livros
 
 	struct NoLivro *livroAtual;//Cria um ponteiro para auxiliar na tarefa
 	
 	livroAtual = listaDeLivros;//o ponteiro auxiliar aponta para onde a lista está apontando
-	printf(" LIVRO                          COD.LIVRO\n");
-	printf(" ------------------------------ ---------\n");
+	imprimeSubcabecalho(5);
+	imprimeSubcabecalho(6);
 	while(livroAtual != NULL){
 		printf(" %-30s %9.09i\n",livroAtual->data.nome, livroAtual->data.codLivro);
 		livroAtual = livroAtual->prox;
@@ -456,8 +493,8 @@ void listarLeitores(struct NoLeitor *listaDeLeitores){//Função para listar os li
 	struct NoLeitor *leitorAtual;//Cria um ponteiro para auxiliar na tarefa
 	
 	leitorAtual = listaDeLeitores;//o ponteiro auxiliar aponta para onde a lista está apontando
-	printf(" LEITOR                         MATRÍCULA\n");
-	printf(" ------------------------------ ---------\n");
+	imprimeSubcabecalho(2);
+	imprimeSubcabecalho(3);
 	while(leitorAtual != NULL){
 		printf(" %-30s %9.09i\n",leitorAtual->data.nome, leitorAtual->data.matricula);
 		leitorAtual = leitorAtual->prox;
@@ -475,15 +512,16 @@ void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *l
 	//Cria um auxiliar de busca
 	int procurado;
 	
+	LIMPA_TELA;
 	switch(indice){
 		case 1:
 			livroAtual = listaDeLivros;//o ponteiro auxiliar aponta para onde a lista está apontando
-			printf("CONSULTA\n");
-			printf("----------\n\n");
+			desenhaCabecalho();
+			imprimeSubcabecalho(9);
 			printf(" DIGITE O CODIGO DO LIVRO: ");
 			scanf("%i",&procurado);
-			printf(" LIVRO                          COD.LIVRO\n");
-			printf(" ------------------------------ ---------\n");
+			printf("\n\n");
+			imprimeSubcabecalho(4);
 			while(livroAtual != NULL){
 				if(livroAtual->data.codLivro == procurado){
 					printf(" %-30s %9.09i\n",livroAtual->data.nome, livroAtual->data.codLivro);
@@ -496,12 +534,12 @@ void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *l
 		
 		case 2:
 			leitorAtual = listaDeLeitores;//o ponteiro auxiliar aponta para onde a lista está apontando
-			printf("CONSULTA\n");
-			printf("----------\n\n");
-			printf(" DIGITE O CODIGO DO LIVRO: ");
+			desenhaCabecalho();
+			imprimeSubcabecalho(9);
+			printf(" DIGITE A MATRÍCULA: ");
 			scanf("%i",&procurado);
-			printf(" LEITOR                         MATRÍCULA\n");
-			printf(" ------------------------------ ---------\n");
+			printf("\n\n");
+			imprimeSubcabecalho(3);
 			while(leitorAtual != NULL){
 				if(leitorAtual->data.matricula == procurado){
 					printf(" %-30s %9.09i\n\n\n",leitorAtual->data.nome, leitorAtual->data.matricula);
@@ -513,11 +551,11 @@ void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *l
 		
 		case 3:
 			emprestimoAtual = listaDeEmprestimos;//o ponteiro auxiliar aponta para onde a lista está apontando
-			printf("CONSULTA\n");
-			printf("----------\n\n");
+			desenhaCabecalho();
+			imprimeSubcabecalho(9);
 			printf(" DIGITE SUA MATRÍCULA: ");
 			scanf("%i",&procurado);
-			printf("\n\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n\n");
+			printf("\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n");
 			printf(" COD                         LEITOR MATRÍCULA LIVRO                          COD.LIVRO\n");
 			printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 			while( emprestimoAtual != NULL ){
@@ -527,6 +565,128 @@ void realizarConsulta(struct NoEmprestimo *listaDeEmprestimos, struct NoLivro *l
 				emprestimoAtual = emprestimoAtual->prox;
 			}
 			printf("\n\n");
-				break;
+		break;
 	}
+}
+
+void realizarAlteracao(struct NoLivro *listaDeLivros, struct NoLeitor *listaDeLeitores, int indice){
+	
+	//Cria um ponteiros para auxiliar na tarefa
+	struct NoLivro      *livroAtual;
+	struct NoLeitor     *leitorAtual;
+	
+	//Cria um auxiliar de busca
+	int procurado;
+	LIMPA_TELA;
+	switch(indice){
+		case 1:
+			livroAtual = listaDeLivros;//o ponteiro auxiliar aponta para onde a lista está apontando
+			desenhaCabecalho();
+			printf("ALTERAÇÃO DE LIVRO\n");
+			printf("-------------------\n\n");
+			printf(" DIGITE O CODIGO DO LIVRO: ");
+			scanf("%i",&procurado);
+			LIMPA_TELA;
+			while(livroAtual != NULL){
+				if(livroAtual->data.codLivro == procurado){
+					desenhaCabecalho();//Chama a função que desenha o cabeçalho
+					printf("ALTERAÇÃO DE LIVRO\n");
+					printf("-------------------\n\n");
+					imprimeSubcabecalho(3);
+					printf(" %-30s %9.09i\n",livroAtual->data.nome, livroAtual->data.codLivro);
+					printf(" DIGITE O NOVO NOME DO LIVRO:");
+					fflush(stdin);//Limpa o buffer do teclado
+					fgets(livroAtual->data.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
+					livroAtual->data.nome[strlen(livroAtual->data.nome) - 1] = '\0';
+				}	
+				livroAtual = livroAtual->prox;
+			}
+						
+			printf("\n\n");
+				
+		break;
+		
+		case 2:
+			leitorAtual = listaDeLeitores;//o ponteiro auxiliar aponta para onde a lista está apontando
+			desenhaCabecalho();
+			printf("ALTERAÇÃO DE LEITOR\n");
+			printf("------------------\n\n");
+			printf(" DIGITE A MATRÍCULA DO LEITOR: ");
+			scanf("%i",&procurado);
+			LIMPA_TELA;
+			while(leitorAtual != NULL){
+				if(leitorAtual->data.matricula == procurado){
+					desenhaCabecalho();//Chama a função que desenha o cabeçalho
+					printf("ALTERAÇÃO DE LEITOR\n");
+					printf("------------------\n\n");
+					imprimeSubcabecalho(3);
+					printf(" %-30s %9.09i\n\n\n",leitorAtual->data.nome, leitorAtual->data.matricula);
+					printf(" DIGITE O NOVO NOME DO LEITOR:");
+					fflush(stdin);//Limpa o buffer do teclado
+					fgets(leitorAtual->data.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
+					leitorAtual->data.nome[strlen(leitorAtual->data.nome) - 1] = '\0';
+				}	
+				leitorAtual = leitorAtual->prox;
+			}
+			
+			printf("\n\n");
+			
+		break;
+
+	}
+}
+
+void imprimeSubcabecalho(int sessao){
+	switch(sessao){
+		case 1:
+			printf("CADASTRO DE LEITOR\n");
+			printf("------------------\n\n");
+		break;
+		
+		case 2:
+			printf("LISTA DE LEITORES\n");
+			printf("-----------------\n\n");
+		break;
+		
+		case 3:
+			printf(" LEITOR                         MATRÍCULA\n");
+			printf(" ------------------------------ ---------\n");
+		break;
+		
+		case 4:
+			printf("CADASTRO DE LIVRO\n");
+			printf("-----------------\n\n");
+		break;
+		
+		case 5:
+			printf("LISTA DE LIVROS\n");
+			printf("---------------\n\n");
+		break;
+		
+		case 6:
+			printf(" LIVRO                          COD.LIVRO\n");
+			printf(" ------------------------------ ---------\n");
+		break;
+		
+		case 7:
+			printf("EMPRÉSTIMO\n");
+			printf("----------\n\n");
+		break;
+		
+		case 8:
+			printf(" COD                         LEITOR MATRÍCULA LIVRO                          COD.LIVRO\n");
+			printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
+		break;
+		
+		case 9:
+			printf("CONSULTA\n");
+			printf("----------\n\n");
+		break;
+		
+		case 10:
+			printf("ALTERAÇÃO\n");
+			printf("----------\n\n");
+		break;		
+	}
+	
 }
