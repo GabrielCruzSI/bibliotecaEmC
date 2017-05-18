@@ -216,7 +216,7 @@ int main(void){
 					LIMPA_TELA;
 					abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb");
 					abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb");
-					if(!fread(&leitorAtual, sizeof(struct Leitor), 1, listaDeLeitores) && !fread(&livroAtual, sizeof(struct Livro), 1, listaDeLivros)){
+					if(!fread(&leitorAtual, sizeof(struct Leitor), 1, listaDeLeitores) || !fread(&livroAtual, sizeof(struct Livro), 1, listaDeLivros)){
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						printf("---ERRO: IMPOSSÍVEL REALIZAR EMPRÉSTIMO---\n\n\n");
 						printf(" O ERRO PODE SER CAUSADO POR:\n\n");
@@ -224,8 +224,7 @@ int main(void){
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
 						printf(" OBS: CONSERTE O ERRO, E TENTE NOVAMENTE!\n");
 						printf("\n\n");
-						fechaArquivo(&listaDeLeitores);
-						fechaArquivo(&listaDeLivros);
+						
 						PAUSE;				
 					}else{
 						fechaArquivo(&listaDeLeitores);
@@ -508,7 +507,7 @@ int abreArquivo(FILE** arquivo, char* nomeDoArquivo, char* modo){
 }
 
 void fechaArquivo(FILE** arquivo){
-	close(*arquivo);
+	fclose(*arquivo);
 }
 
 void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op){
@@ -552,7 +551,7 @@ struct Emprestimo recolheDadosEmprestimo(int* codEmp){
 	imprimeSubCabecalho(7);
 	printf(" DIGITE SUA MATRÍCULA: ");
 	scanf("%i",&dadosEmprestimo.matricula);	
-
+	
 	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
 	retornaNome(&dadosEmprestimo, (dadosEmprestimo.matricula), 0 ,2);
 	LIMPA_TELA;
