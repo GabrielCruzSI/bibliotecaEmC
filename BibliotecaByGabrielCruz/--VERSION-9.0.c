@@ -45,6 +45,7 @@ typedef struct Emprestimo{
 	char livroEmp[TS];
 	int matricula;
 	char leitor[TS];
+	char success;
 }Emprestimo;
 
 //Estrutras Para Contar 
@@ -143,7 +144,7 @@ int main(void){
 		desenhaCabecalho();//Chama a função que desenha o cabeçalho
 		fflush(stdin);
 		printf("1-CADASTRAR LEITOR    3-LISTAR LEITORES     5-REALIZAR EMPRESTIMO     7-ALTERA   9-SAIR\n");
-		printf("2-CADASTRAR LIVRO     4-LISTAR LIVROS       6-REALIZAR CONSULTA       8-EXCLUI   10-LIMPAR LIXEIRA\n\nOPCAO:");
+		printf("2-CADASTRAR LIVRO     4-LISTAR LIVROS       6-REALIZAR CONSULTA       8-EXCLUI   10-LIXEIRA\n\nOPCAO:");
 		scanf("%i",&op);
 		
 		
@@ -165,7 +166,7 @@ int main(void){
 						imprimeSubCabecalho(1);
 						printf(" LEITOR CADASTRADO COM SUCESSO!\n\n");
 						imprimeSubCabecalho(3);
-						printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+						printf(" %-1c %-30s %9.09i\n\n\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
 						system("pause"); 
 					}
 										
@@ -194,7 +195,7 @@ int main(void){
 					LIMPA_TELA;
 						if(listarLeitores() == 0){
 							desenhaCabecalho();
-							imprimeSubCabecalho(11);
+							imprimeSubCabecalho(12);
 							PAUSE;					
 						}else{
 							PAUSE;
@@ -205,7 +206,7 @@ int main(void){
 						LIMPA_TELA;
 						if(listarLivros() == 0){
 							desenhaCabecalho();
-							imprimeSubCabecalho(12);
+							imprimeSubCabecalho(13);
 							PAUSE;					
 						}else{
 							PAUSE;
@@ -224,15 +225,25 @@ int main(void){
 						printf("   2)FALTA DE LIVROS CONSTANDO NA BASE DE DADOS\n\n");
 						printf(" OBS: CONSERTE O ERRO, E TENTE NOVAMENTE!\n");
 						printf("\n\n");
-						
 						PAUSE;				
 					}else{
 						fechaArquivo(&listaDeLeitores);
 						fechaArquivo(&listaDeLivros);
 						emprestimoAtual = realizarEmprestimo(&listaDeEmprestimos, recolheDadosEmprestimo(&codEmp));
 						
-						if(emprestimoAtual.codigo == 0){
-							printf("Fudeuu");
+						if(emprestimoAtual.success == '1' || emprestimoAtual.success == '2'){
+							LIMPA_TELA;
+							desenhaCabecalho();//Chama a função que desenha o cabeçalho
+							imprimeSubCabecalho(7);
+							printf("---ERRO: IMPOSSÍVEL REALIZAR EMPRÉSTIMO---\n\n\n");
+							if(emprestimoAtual.success == '1')
+								printf(" O LIVRO INFORMADO, NÃO CONSTA MAIS NA BASE DE DADOS");
+							if(emprestimoAtual.success == '2')
+								printf(" O LEITOR INFORMADO, NÃO CONSTA MAIS NA BASE DE DADOS");
+							printf("\n\n");
+							PAUSE;
+							fflush(stdin);
+							emprestimoAtual.success = '*';
 						}else{
 							LIMPA_TELA;
 							desenhaCabecalho();//Chama a função que desenha o cabeçalho
@@ -245,131 +256,147 @@ int main(void){
 				break;
 				
 				case 6://Realizar Consulta
-					LIMPA_TELA;
-					desenhaCabecalho();
-					imprimeSubCabecalho(9);
-					printf("1-CONSULTAR LIVRO    2-CONSULTAR LEITOR    3-CONSULTAR EMPRESTIMO    4-CANCELAR OPERAÇÃO\n\nOPCAO:");
-					scanf("%i", &opcao);
-					switch(opcao){
-						case 1:
-							if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb") == 1){
-								realizarConsulta(opcao, &listaDeLivros);
-								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}
-						break;
+					do{
+						LIMPA_TELA;
+						desenhaCabecalho();
+						imprimeSubCabecalho(9);
+						printf("1-CONSULTAR LIVRO    2-CONSULTAR LEITOR    3-CONSULTAR EMPRESTIMO    4-CANCELAR OPERAÇÃO\n\nOPCAO:");
+						fflush(stdin);
+						scanf("%i", &opcao);
+						if(opcao == 4) break;
+						switch(opcao){
+							case 1:
+								if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb") == 1){
+									realizarConsulta(opcao, &listaDeLivros);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}
+							break;
+								
+							case 2:
+								if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb") == 1){
+									realizarConsulta(opcao, &listaDeLeitores);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}	
+							break;
 							
-						case 2:
-							if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb") == 1){
-								realizarConsulta(opcao, &listaDeLeitores);
-								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}	
-						break;
-						
-						case 3:
-							if(abreArquivo(&listaDeEmprestimos, "emprestimos/listaDeEmprestimos.dat", "rb") == 1){
-								realizarConsulta(opcao, &listaDeEmprestimos);
-								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}					
-						break;
-						
-						case 4:
+							case 3:
+								if(abreArquivo(&listaDeEmprestimos, "emprestimos/listaDeEmprestimos.dat", "rb") == 1){
+									realizarConsulta(opcao, &listaDeEmprestimos);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}					
+							break;
 							
-						break;
+							case 4:
+								
+							break;
+							
+							default:
+								LIMPA_TELA;
+								desenhaCabecalho();
+								imprimeSubCabecalho(9);
+								printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
+								PAUSE;
 						
-						default:
-							LIMPA_TELA;
-							printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-							PAUSE;
-						
-					}
+						}
+					}while(opcao != 4);
+					
 
 				break;	
 					
 				case 7://Realizar Alteração
-					LIMPA_TELA;
-					desenhaCabecalho();
-					printf("1-ALTERAR LIVRO    2-ALTERAR LEITOR    3-CANCELAR OPERAÇÃO\n\nOPCAO:");
-					scanf("%i", &opcao);
-					switch(opcao){
-						case 1:
-							if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
-								realizarAlteracao(1, &listaDeLivros);
-								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}
-						break;
+					do{
+						LIMPA_TELA;
+						desenhaCabecalho();
+						printf("1-ALTERAR LIVRO    2-ALTERAR LEITOR    3-CANCELAR OPERAÇÃO\n\nOPCAO:");
+						fflush(stdin);
+						scanf("%i", &opcao);
+						if(opcao == 3)break;
+						switch(opcao){
+							case 1:
+								if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
+									realizarAlteracao(1, &listaDeLivros);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}
+							break;
+								
+							case 2:
+								if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
+									realizarAlteracao(2, &listaDeLeitores);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}	
+							break;
 							
-						case 2:
-							if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
-								realizarAlteracao(2, &listaDeLeitores);
+							case 3:
+													
+							break;
+							
+							default:
+								LIMPA_TELA;
+								desenhaCabecalho();
+								imprimeSubCabecalho(10);
+								printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
 								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}	
-						break;
-						
-						case 3:
-												
-						break;
-						
-						default:
-							LIMPA_TELA;
-							printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-							PAUSE;
-						
-					}
-										
+						}
+					}while(opcao != 3);							
 				break;	
 				
 				case 8:
-					LIMPA_TELA;
-					desenhaCabecalho();
-					printf("1-EXCLUIR LIVRO    2-EXCLUIR LEITOR    3-CANCELAR OPERAÇÃO\n\nOPCAO:");
-					scanf("%i", &opcao);
-					switch(opcao){
-						case 1:
-							if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
-								realizarExclusao(1, &listaDeLivros);
-								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}
-						break;
+					do{
+						LIMPA_TELA;
+						desenhaCabecalho();
+						imprimeSubCabecalho(11);
+						printf("1-EXCLUIR LIVRO    2-EXCLUIR LEITOR    3-CANCELAR OPERAÇÃO\n\nOPCAO:");
+						fflush(stdin);
+						scanf("%i", &opcao);
+						switch(opcao){
+							case 1:
+								if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
+									realizarExclusao(1, &listaDeLivros);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}
+							break;
+								
+							case 2:
+								if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
+									realizarExclusao(2, &listaDeLeitores);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}	
+							break;
 							
-						case 2:
-							if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
-								realizarExclusao(2, &listaDeLeitores);
+							case 3:
+													
+							break;
+							
+							default:
+								LIMPA_TELA;
+								desenhaCabecalho();
+								imprimeSubCabecalho(11);
+								printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
 								PAUSE;
-							}else{
-								printf("erro");
-								PAUSE;
-							}	
-						break;
-						
-						case 3:
-												
-						break;
-						
-						default:
-							LIMPA_TELA;
-							printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
-							PAUSE;
-						
-					}
-					
+							
+						}
+					}while(opcao != 3);
 				break;		
 				
 				default:
@@ -525,7 +552,10 @@ void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op){
 			abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb");
 			while(fread(&nomeLivroAtual, sizeof(struct Livro), 1, listaDeLivros)){
 				if(nomeLivroAtual.codLivro == codLivro)
-					strcpy((*va).livroEmp,nomeLivroAtual.nome);
+					if(nomeLivroAtual.deletado == ' ')//Verifica se está deletado
+						strcpy((*va).livroEmp,nomeLivroAtual.nome);
+					else
+						(*va).success = '1';
 			}
 			fechaArquivo(&listaDeLivros);
 		break;
@@ -534,7 +564,10 @@ void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op){
 			abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb");
 			while(fread(&nomeLeitorAtual, sizeof(struct Leitor), 1, listaDeLeitores)){
 				if(nomeLeitorAtual.matricula == matricula)
-					strcpy((*va).leitor, nomeLeitorAtual.nome);
+					if(nomeLeitorAtual.deletado == ' ')//Verifica se está deletado
+						strcpy((*va).leitor, nomeLeitorAtual.nome);
+					else
+						(*va).success = '2';
 			}
 			fechaArquivo(&listaDeLeitores);
 		break;
@@ -554,6 +587,9 @@ struct Emprestimo recolheDadosEmprestimo(int* codEmp){
 	
 	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
 	retornaNome(&dadosEmprestimo, (dadosEmprestimo.matricula), 0 ,2);
+	if(dadosEmprestimo.success == '2')
+		return dadosEmprestimo;
+	
 	LIMPA_TELA;
 	//desenhaCabecalho();
 	listarLivros();
@@ -564,6 +600,9 @@ struct Emprestimo recolheDadosEmprestimo(int* codEmp){
 	//Usa a função retornaNome para procurar o nome do livro correspondente ao codLivro digitada e copia para dadosEmprestimo.livro
 	retornaNome(&dadosEmprestimo, 0, (dadosEmprestimo.codigoLivro) ,1);
 	
+	if(dadosEmprestimo.success == '1')
+		return dadosEmprestimo;
+	
 	dadosEmprestimo.codigo = *codEmp;
 	(*codEmp)++;//Incrementa o numero de codEmp
 	
@@ -571,19 +610,23 @@ struct Emprestimo recolheDadosEmprestimo(int* codEmp){
 }
 
 struct Emprestimo realizarEmprestimo(FILE** listaDeEmprestimos, struct Emprestimo dadosEmprestimo){
-
-	*listaDeEmprestimos = fopen("emprestimos/listaDeEmprestimos.dat", "ab");
 	
-	if (*listaDeEmprestimos == NULL) {
-		dadosEmprestimo.codigo = 0;
+	if(dadosEmprestimo.success == '1' || dadosEmprestimo.success == '2')
 		return dadosEmprestimo;
-	}
-	
-	fwrite(&dadosEmprestimo, sizeof(struct Emprestimo), 1, *listaDeEmprestimos);
-	
-	fclose(*listaDeEmprestimos);
-	
-	return dadosEmprestimo;	
+	else{
+		*listaDeEmprestimos = fopen("emprestimos/listaDeEmprestimos.dat", "ab");
+		
+		if (*listaDeEmprestimos == NULL) {
+			dadosEmprestimo.codigo = 0;
+			return dadosEmprestimo;
+		}
+		
+		fwrite(&dadosEmprestimo, sizeof(struct Emprestimo), 1, *listaDeEmprestimos);
+		
+		fclose(*listaDeEmprestimos);
+		
+		return dadosEmprestimo;
+	}	
 }
 
 int listarLivros(){//Função para listar os livros
@@ -598,10 +641,12 @@ int listarLivros(){//Função para listar os livros
 	}
 	desenhaCabecalho();
 	imprimeSubCabecalho(5);
-	imprimeSubCabecalho(6);
 
 	while (fread(&livroAtual, sizeof(struct Livro), 1, arquivo))
-		printf(" %-1c %-30s %9.09i\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+		if(livroAtual.deletado== ' '){//Verifica se está deletado
+			imprimeSubCabecalho(6);
+			printf(" %-1c %-30s %9.09i\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+		}
 	
 	printf("\n");
 	fclose(arquivo);
@@ -622,10 +667,14 @@ int listarLeitores(){//Função para listar os livros
 	}
 	desenhaCabecalho();
 	imprimeSubCabecalho(2);
-	imprimeSubCabecalho(3);
 
 	while (fread(&leitorAtual, sizeof(struct Leitor), 1, arquivo))
-		printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+		if(leitorAtual.deletado== ' '){//Verifica se está deletado
+			imprimeSubCabecalho(3);
+			printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+		}
+	
+	//imprimeSubCabecalho(12);
 	
 	printf("\n");
 	fclose(arquivo);
@@ -642,7 +691,7 @@ void realizarConsulta(int indice, FILE** listaAtual){
 	struct Leitor     leitorAtual;
 	
 	//Cria um auxiliar de busca
-	int procurado;
+	int procurado, achei;
 	
 	LIMPA_TELA;
 	switch(indice){
@@ -651,16 +700,21 @@ void realizarConsulta(int indice, FILE** listaAtual){
 			imprimeSubCabecalho(9);
 			printf(" DIGITE O CODIGO DO LIVRO: ");
 			scanf("%i",&procurado);
-			printf("\n\n");
-			imprimeSubCabecalho(6);
 			while(fread(&livroAtual, sizeof(struct Livro), 1, *listaAtual)){
 				if(livroAtual.codLivro == procurado && livroAtual.deletado == ' '){
+					if(achei == 0)imprimeSubCabecalho(6);
 					printf(" %-1c %-30s %9.09i\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+					achei = 1;
 				}	
 			}
-			fechaArquivo(&(*listaAtual));
-			printf("\n\n");
+			
+			if(!achei)
+				printf("\n\n CÓDIGO NÃO ENCONTRADO!\n\n");
+			else
+				printf("\n\n");
 				
+			fechaArquivo(&(*listaAtual));
+			
 		break;
 		
 		case 2:
@@ -668,15 +722,21 @@ void realizarConsulta(int indice, FILE** listaAtual){
 			imprimeSubCabecalho(9);
 			printf(" DIGITE A MATRÍCULA: ");
 			scanf("%i",&procurado);
-			printf("\n\n");
-			imprimeSubCabecalho(3);
 			while(fread(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual)){
 				if(leitorAtual.matricula == procurado && leitorAtual.deletado == ' '){
+					if(achei == 0)imprimeSubCabecalho(3);
 					printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+					achei = 1;
 				}	
 			}
+			
+			if(!achei)
+				printf("\n\n CÓDIGO NÃO ENCONTRADO!\n\n");
+			else
+				printf("\n\n");
+					
 			fechaArquivo(&(*listaAtual));
-			printf("\n\n");
+			
 		break;
 		
 		case 3:
@@ -684,16 +744,24 @@ void realizarConsulta(int indice, FILE** listaAtual){
 			imprimeSubCabecalho(9);
 			printf(" DIGITE SUA MATRÍCULA: ");
 			scanf("%i",&procurado);
-			printf("\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n");
-			printf(" COD                         LEITOR MATRÍCULA LIVRO                          COD.LIVRO\n");
-			printf(" --- ------------------------------ --------- ------------------------------ ---------\n");
 			while(fread(&emprestimoAtual, sizeof(struct Emprestimo), 1, *listaAtual) ){
 				if(emprestimoAtual.matricula == procurado ){
-				printf(" %3.03i %30s %9.09i %30s %9.09i\n", emprestimoAtual.codigo, emprestimoAtual.leitor, emprestimoAtual.matricula, emprestimoAtual.livroEmp, emprestimoAtual.codigoLivro);
+					if(achei == 0){
+						printf("\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n");
+						imprimeSubCabecalho(8);
+					}
+					printf(" %3.03i %30s %9.09i %30s %9.09i\n", emprestimoAtual.codigo, emprestimoAtual.leitor, emprestimoAtual.matricula, emprestimoAtual.livroEmp, emprestimoAtual.codigoLivro);
+					achei = 1;
 				}
 			}
+			
+			if(!achei)
+				printf("\n\n CÓDIGO NÃO ENCONTRADO!\n\n");
+			else
+				printf("\n\n");
+					
 			fechaArquivo(&(*listaAtual));
-			printf("\n\n");
+			
 		break;
 	}
 }
@@ -750,7 +818,7 @@ void realizarAlteracao(int indice, FILE** listaAtual){
 			scanf("%i",&procurado);
 			LIMPA_TELA;
 			while(fread(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual)){
-				if(leitorAtual.matricula == procurado){
+				if(leitorAtual.matricula == procurado && leitorAtual.deletado == ' '){
 					desenhaCabecalho();//Chama a função que desenha o cabeçalho
 					printf("ALTERAÇÃO DE LEITOR\n");
 					printf("------------------\n\n");
@@ -810,12 +878,12 @@ void realizarExclusao(int indice, FILE** listaAtual){
 					fseek(*listaAtual, 0, SEEK_CUR);
 				}	
 			}
-			printf("\n\n");
 			
 			if(!achei)
 				printf("CÓDIGO NÃO ENCONTRADO!");
+			else
+				printf("LIVRO MOVIDO PARA LIXEIRA!\n É POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
 				
-			printf("LIVRO MOVIDO PARA LIXEIRA!\nÉ POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
 			fclose(*listaAtual);
 			
 		break;
@@ -828,7 +896,7 @@ void realizarExclusao(int indice, FILE** listaAtual){
 			scanf("%i",&procurado);
 			LIMPA_TELA;
 			while(fread(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual)){
-				if(leitorAtual.matricula == procurado){
+				if(leitorAtual.matricula == procurado && leitorAtual.deletado == ' '){
 					desenhaCabecalho();//Chama a função que desenha o cabeçalho
 					printf("EXCLUSÃO DE LEITOR\n");
 					printf("------------------\n\n");
@@ -841,12 +909,12 @@ void realizarExclusao(int indice, FILE** listaAtual){
 					fseek(*listaAtual, 0, SEEK_CUR);
 				}	
 			}
-			printf("\n\n");	
 			
 			if(!achei)
 				printf("CÓDIGO NÃO ENCONTRADO!");
+			else	
+				printf(" LEITOR MOVIDO PARA LIXEIRA!\n É POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
 				
-			printf("LEITOR MOVIDO PARA LIXEIRA!\nÉ POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
 			fclose(*listaAtual);
 			
 		break;
@@ -906,13 +974,18 @@ void imprimeSubCabecalho(int sessao){
 			printf("----------\n\n");
 		break;		
 		
-		case 11://Erro listagem de Leitores
+		case 11:
+			printf("EXCLUSÃO\n");
+			printf("--------\n\n");
+		break;
+		
+		case 12://Erro listagem de Leitores
 			printf("---ERRO: IMPOSSÍVEL LISTAR LEITORES---\n\n\n");
 			printf(" NENHUM LEITOR CADASTRADO ATE O MOMENTO!\n\n");
 			printf("\n\n");
 		break;
 		
-		case 12://Erro listagem de Leitores
+		case 13://Erro listagem de Leitores
 			printf("---ERRO: IMPOSSÍVEL LISTAR LIVROS---\n\n\n");
 			printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 			printf("\n\n");
