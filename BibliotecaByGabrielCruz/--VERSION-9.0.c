@@ -42,10 +42,9 @@ typedef struct Livro {
 typedef struct Emprestimo{
 	int codigo;
 	int codigoLivro;
-	char livroEmp[TS];
 	int matricula;
-	char leitor[TS];
 	char success;
+	int adress[2];
 }Emprestimo;
 
 //Estrutras Para Contar 
@@ -54,6 +53,7 @@ typedef struct Cont{
 	int codLiv;
 	int codEmp;
 	int situacao;
+	int flag;
 }Cont;
 
 //Declaração de Protótipos das Funções
@@ -66,24 +66,23 @@ void desenhaCabecalho(void);
 void imprimeSubCabecalho(int sessao);
 
 //Cadastrar Leitor
-struct Leitor recolheDadosLeitor(int *matricula);
+struct Leitor recolheDadosLeitor(int matricula);
 struct Leitor cadastraLeitor( FILE** listaDeleitores,  struct Leitor dadosLeitor);
 
-
 //Cadastrar Livro
-struct Livro recolheDadosLivro(int *codLivro);
+struct Livro recolheDadosLivro(int codLivro);
 struct Livro cadastraLivro( FILE** listaDelivros,  struct Livro dadosLivro);
 
 //Realizar Emprestimo
-struct Emprestimo recolheDadosEmprestimo(int *codEmp);
-void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op);
+struct Emprestimo recolheDadosEmprestimo(int codEmp);
+void retornaNome(int matricula, int codLivro, int);
 struct Emprestimo realizarEmprestimo(FILE** , struct Emprestimo dadosEmprestimo);
 
 //Listar Livros
 int listarLivros();
 
 //Listar Leitores
-int listarLeitores();
+int listarLeitores(int op);
 
 //Abre/Fecha Arquivo
 int abreArquivo(FILE** arquivo, char* nomeDoArquivo, char* modo);
@@ -96,10 +95,16 @@ void realizarConsulta(int indice, FILE** listaAtual);
 void realizarAlteracao(int indice, FILE** listaAtual);
 
 //Realizar Alteração
-void realizarExclusao(int indice, FILE** listaAtual);
+void excluiRestaura(int indice, FILE** listaAtual, int op);
+
+//Limpa Lixeira
+void limpaLixeira(void);
+
+//getsize
+int get_size(const char* file_name);
 
 //Atualiza Contadores
-int atualizaContadores(int, int, int);
+int atualizaContadores(int, int, int, int);
 
 //====================================================================================================================//
 
@@ -110,25 +115,39 @@ int main(void){
 	struct Cont contador;
 	int situacao;
 	
-	int codEmp = 0, matricula = 0, codLivro = 0, op , opcao;
+	int codEmp = 0, matricula = 0, codLivro = 0, flag = 0,  op , opcao;
 	
-	situacao = abreArquivo(&cont, "cont/cont.dat", "rb");
-	
-	if(situacao == 0){
-		codEmp=1; 
-		matricula=1; 
-		codLivro=1;
-	}
+	situacao = abreArquivo(&cont, "cont/cont.dat", "r+b");
 	
 	if(situacao == 1){
 		fread(&contador, sizeof(struct Cont), 1, cont);
-		
 		codEmp = contador.codEmp;
 		matricula = contador.mat;
 		codLivro = contador.codLiv;
-		
+		flag = contador.flag;
 		fechaArquivo(&cont);
-	}	
+	}
+	
+	if(situacao == 0){
+		abreArquivo(&cont, "cont/cont.dat", "wb");
+		codEmp=1; 
+		matricula=1; 
+		codLivro=1;
+		flag = 1;
+		contador.codEmp = codEmp;
+		contador.mat = matricula;
+		contador.codLiv = codLivro;
+		contador.flag = 0;
+		fwrite(&contador, sizeof(struct Cont), 1, cont);
+		fechaArquivo(&cont);
+	}
+	
+	if(flag == 0){
+		codEmp++;
+		matricula++;
+		codLivro++;
+	}
+	
 	
 	//Declaração de variáveis Personalizadas
 	struct Leitor 	  leitorAtual	 ;
@@ -138,7 +157,7 @@ int main(void){
 	//Configuração de Caracteres para 'UTF-8' (Permite o usuo de acentos no programa)
 	setlocale(LC_ALL, "");
 	
-	//Início do Ciclo DoWhile do Programa	
+	//Início do Ciclo DoWhile do Programa
 	do{	
 		LIMPA_TELA;//limpa a Tela
 		desenhaCabecalho();//Chama a função que desenha o cabeçalho
@@ -157,16 +176,17 @@ int main(void){
 					
 					LIMPA_TELA;//limpa a Tela
 					
-					leitorAtual = cadastraLeitor(&listaDeLeitores, recolheDadosLeitor(&matricula));
+					leitorAtual = cadastraLeitor(&listaDeLeitores, recolheDadosLeitor(matricula));
 					
 					if(leitorAtual.matricula == 0){
 						printf(" TEMOS UM NÚMERO MUITO GRANDE DE LEITORES!\nPOR FAVOR, VOLTE MÊS QUE VEM!\n\n");
 					}else{
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						imprimeSubCabecalho(1);
+						matricula++;//Incrementa o numero da matricula
 						printf(" LEITOR CADASTRADO COM SUCESSO!\n\n");
 						imprimeSubCabecalho(3);
-						printf(" %-1c %-30s %9.09i\n\n\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+						printf(" %-30s %9.09i\n\n\n",leitorAtual.nome, leitorAtual.matricula);
 						system("pause"); 
 					}
 										
@@ -175,7 +195,7 @@ int main(void){
 				case 2://Cadastra Livro
 					LIMPA_TELA;
 					
-					livroAtual = cadastraLivro(&listaDeLivros, recolheDadosLivro(&codLivro));
+					livroAtual = cadastraLivro(&listaDeLivros, recolheDadosLivro(codLivro));
 					
 					if(livroAtual.codLivro == 0){
 						printf(" ESTOQUE MUITO CHEIO!\nPOR FAVOR, ESPERE AUMENTAR-MOS NOSSA ESTRUTURA!");
@@ -183,9 +203,10 @@ int main(void){
 					}else{
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						imprimeSubCabecalho(4);
+						codLivro++;
 						printf(" LIVRO CADASTRADO COM SUCESSO!\n\n");
 						imprimeSubCabecalho(6);
-						printf(" %-1c %-30s %9.09i\n\n\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+						printf(" %-30s %9.09i\n\n\n", livroAtual.nome, livroAtual.codLivro);
 						PAUSE;	
 					} 
 					
@@ -193,8 +214,8 @@ int main(void){
 					
 				case 3://Lista Leitores
 					LIMPA_TELA;
-						if(listarLeitores() == 0){
-							desenhaCabecalho();
+					desenhaCabecalho();
+						if(listarLeitores(1) == 0){
 							imprimeSubCabecalho(12);
 							PAUSE;					
 						}else{
@@ -204,8 +225,8 @@ int main(void){
 			
 				case 4://Lista Livros
 						LIMPA_TELA;
-						if(listarLivros() == 0){
-							desenhaCabecalho();
+						desenhaCabecalho();
+						if(listarLivros(1) == 0){
 							imprimeSubCabecalho(13);
 							PAUSE;					
 						}else{
@@ -215,9 +236,7 @@ int main(void){
 				
 				case 5://Realiza Empréstimo
 					LIMPA_TELA;
-					abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb");
-					abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb");
-					if(!fread(&leitorAtual, sizeof(struct Leitor), 1, listaDeLeitores) || !fread(&livroAtual, sizeof(struct Livro), 1, listaDeLivros)){
+					if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb") == 0 || abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb") == 0){
 						desenhaCabecalho();//Chama a função que desenha o cabeçalho
 						printf("---ERRO: IMPOSSÍVEL REALIZAR EMPRÉSTIMO---\n\n\n");
 						printf(" O ERRO PODE SER CAUSADO POR:\n\n");
@@ -229,7 +248,7 @@ int main(void){
 					}else{
 						fechaArquivo(&listaDeLeitores);
 						fechaArquivo(&listaDeLivros);
-						emprestimoAtual = realizarEmprestimo(&listaDeEmprestimos, recolheDadosEmprestimo(&codEmp));
+						emprestimoAtual = realizarEmprestimo(&listaDeEmprestimos, recolheDadosEmprestimo(codEmp));
 						
 						if(emprestimoAtual.success == '1' || emprestimoAtual.success == '2'){
 							LIMPA_TELA;
@@ -246,10 +265,10 @@ int main(void){
 							emprestimoAtual.success = '*';
 						}else{
 							LIMPA_TELA;
+							codEmp++;
 							desenhaCabecalho();//Chama a função que desenha o cabeçalho
 							imprimeSubCabecalho(7);
-							imprimeSubCabecalho(8);
-							printf(" %3.03i %30s %9.09i %30s %9.09i\n\n", emprestimoAtual.codigo, emprestimoAtual.leitor, emprestimoAtual.matricula, emprestimoAtual.livroEmp, emprestimoAtual.codigoLivro);
+							printf(" EMPRÉSTIMO REALIZADO COM SUCESSO!\n\n");
 							PAUSE;	
 						}							
 					}
@@ -366,7 +385,7 @@ int main(void){
 						switch(opcao){
 							case 1:
 								if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
-									realizarExclusao(1, &listaDeLivros);
+									excluiRestaura(1, &listaDeLivros, 0);
 									PAUSE;
 								}else{
 									printf("erro");
@@ -376,7 +395,7 @@ int main(void){
 								
 							case 2:
 								if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
-									realizarExclusao(2, &listaDeLeitores);
+									excluiRestaura(2, &listaDeLeitores, 0);
 									PAUSE;
 								}else{
 									printf("erro");
@@ -397,7 +416,60 @@ int main(void){
 							
 						}
 					}while(opcao != 3);
-				break;		
+				break;	
+				
+				case 10:
+					do{
+						LIMPA_TELA;
+						desenhaCabecalho();
+						imprimeSubCabecalho(14);
+						printf("1-RESTAURAR LIVRO    2-RESTAURAR LEITOR    3-LIMPAR LIXEIRA    4-CANCELAR OPERAÇÃO\n\nOPCAO:");
+						fflush(stdin);
+						scanf("%i", &opcao);
+						switch(opcao){
+							case 1:
+								if(abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "r+b") == 1){
+									excluiRestaura(1, &listaDeLivros, 1);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}
+							break;
+								
+							case 2:
+								if(abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "r+b") == 1){
+									excluiRestaura(2, &listaDeLeitores, 1);
+									PAUSE;
+								}else{
+									printf("erro");
+									PAUSE;
+								}	
+							break;
+							
+							case 3:
+								LIMPA_TELA;
+								desenhaCabecalho();
+								imprimeSubCabecalho(11);
+								printf("Limpando Lixeira...\n\n");
+								limpaLixeira();
+								PAUSE;
+							break;
+							
+							case 4:
+								
+							break;
+							
+							default:
+								LIMPA_TELA;
+								desenhaCabecalho();
+								imprimeSubCabecalho(11);
+								printf("OPÇÃO INVÁLIDA. TENTE NOVAMENTE\n\n");//CASO O O USUÁRIO DIGITE UM NUMERO DIFERENTES DOS PRÉ-DEFINIDOS.
+								PAUSE;
+							
+						}
+					}while(opcao != 4);
+				break;	
 				
 				default:
 					LIMPA_TELA;
@@ -417,7 +489,8 @@ int main(void){
 	}
 	
 	if(situacao == 1){
-		situacao = atualizaContadores(codEmp, matricula , codLivro);
+		flag = 1;
+		situacao = atualizaContadores(codEmp, matricula , codLivro, flag);
 		if(situacao == 0){
 			printf("Falha grave no Sistema");
 		}
@@ -426,7 +499,7 @@ int main(void){
 	return 0;
 }
 
-int atualizaContadores(int codEmp, int matricula, int codLivro){
+int atualizaContadores(int codEmp, int matricula, int codLivro, int flag){
 	
 	struct Cont dadosAtualizados;
 	FILE *arquivo;
@@ -434,6 +507,7 @@ int atualizaContadores(int codEmp, int matricula, int codLivro){
 	dadosAtualizados.codEmp = codEmp;
 	dadosAtualizados.mat = matricula;
 	dadosAtualizados.codLiv = codLivro;
+	dadosAtualizados.flag = flag;
 	
 	arquivo = fopen("cont/cont.dat", "wb");
 	
@@ -454,7 +528,7 @@ void desenhaCabecalho(void){// FUNÇÃO PARA DESENHAR O CABEÇALHO DO SISTEMA.
 	printf("--------------------------------------------------------------------------------------------------\n\n");
 }
 
-struct Leitor recolheDadosLeitor(int *matricula){
+struct Leitor recolheDadosLeitor(int matricula){
 
 	struct Leitor leitor;
 	desenhaCabecalho();//Chama a função que desenha o cabeçalho
@@ -464,8 +538,7 @@ struct Leitor recolheDadosLeitor(int *matricula){
 	fflush(stdin);//Limpa o buffer do teclado
 	fgets(leitor.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	leitor.nome[strlen(leitor.nome) - 1] = '\0';
-	leitor.matricula = *matricula;
-	(*matricula)++;//Incrementa o numero da matricula
+	leitor.matricula = matricula;
 	LIMPA_TELA;	
 	return leitor;
 }
@@ -489,7 +562,7 @@ struct Leitor cadastraLeitor(FILE** listaDeLeitores, struct Leitor dadosLeitor){
 
 }
 
-struct Livro recolheDadosLivro(int *codLivro){
+struct Livro recolheDadosLivro(int codLivro){
 	
 	struct Livro dadosLivro;
 	fflush(stdin);//Limpa o buffer do teclado
@@ -500,8 +573,7 @@ struct Livro recolheDadosLivro(int *codLivro){
 	fflush(stdin);//Limpa o buffer do teclado
 	fgets(dadosLivro.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 	dadosLivro.nome[strlen(dadosLivro.nome) - 1] = '\0';
-	dadosLivro.codLivro = *codLivro;
-	(*codLivro)++;//Incrementa o numero do CodLivro
+	dadosLivro.codLivro = codLivro;
 	LIMPA_TELA;	
 	return dadosLivro;
 }
@@ -537,7 +609,7 @@ void fechaArquivo(FILE** arquivo){
 	fclose(*arquivo);
 }
 
-void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op){
+void retornaNome(int matricula, int codLivro, int op){
 
 	fflush(stdin);//Limpa o buffer do teclado
 	
@@ -548,34 +620,33 @@ void retornaNome(struct Emprestimo *va, int matricula, int codLivro, int op){
 	struct Leitor nomeLeitorAtual;
 	
 	switch(op){
-		case 1://caso a opção seja 1 a função vai procurar o nome do livro correspondente ao codLivro
+		case 1:
 			abreArquivo(&listaDeLivros, "livros/listaDeLivros.dat", "rb");
 			while(fread(&nomeLivroAtual, sizeof(struct Livro), 1, listaDeLivros)){
-				if(nomeLivroAtual.codLivro == codLivro)
+				if(nomeLivroAtual.codLivro == codLivro){
 					if(nomeLivroAtual.deletado == ' ')//Verifica se está deletado
-						strcpy((*va).livroEmp,nomeLivroAtual.nome);
-					else
-						(*va).success = '1';
+						printf("%30s", nomeLivroAtual.nome);
+				}
 			}
 			fechaArquivo(&listaDeLivros);
+			
 		break;
 		
-		case 2://caso a opção seja 2 a função vai procurar o nome do leitor correspondente à matrícula
+		case 2:
 			abreArquivo(&listaDeLeitores, "leitores/listaDeLeitores.dat", "rb");
 			while(fread(&nomeLeitorAtual, sizeof(struct Leitor), 1, listaDeLeitores)){
-				if(nomeLeitorAtual.matricula == matricula)
+				if(nomeLeitorAtual.matricula == matricula){
 					if(nomeLeitorAtual.deletado == ' ')//Verifica se está deletado
-						strcpy((*va).leitor, nomeLeitorAtual.nome);
-					else
-						(*va).success = '2';
+						printf("%30s", nomeLeitorAtual.nome);
+				}
 			}
 			fechaArquivo(&listaDeLeitores);
+			
 		break;
-		
-	}	
+	}
 }
 
-struct Emprestimo recolheDadosEmprestimo(int* codEmp){
+struct Emprestimo recolheDadosEmprestimo(int codEmp){
 
 	struct Emprestimo dadosEmprestimo;
 	fflush(stdin);//Limpa o buffer do teclado.
@@ -585,26 +656,20 @@ struct Emprestimo recolheDadosEmprestimo(int* codEmp){
 	printf(" DIGITE SUA MATRÍCULA: ");
 	scanf("%i",&dadosEmprestimo.matricula);	
 	
-	//Usa a função retornaNome para procurar o nome do leitor correspondente a matricula digitada e copia para dadosEmprestimo.leitor
-	retornaNome(&dadosEmprestimo, (dadosEmprestimo.matricula), 0 ,2);
 	if(dadosEmprestimo.success == '2')
 		return dadosEmprestimo;
 	
 	LIMPA_TELA;
-	//desenhaCabecalho();
-	listarLivros();
+	desenhaCabecalho();
+	listarLivros(1);
 	imprimeSubCabecalho(7);
 	printf(" DIGITE O CODIGO DO LIVRO: ");
 	scanf("%i",&dadosEmprestimo.codigoLivro);
 	
-	//Usa a função retornaNome para procurar o nome do livro correspondente ao codLivro digitada e copia para dadosEmprestimo.livro
-	retornaNome(&dadosEmprestimo, 0, (dadosEmprestimo.codigoLivro) ,1);
-	
 	if(dadosEmprestimo.success == '1')
 		return dadosEmprestimo;
 	
-	dadosEmprestimo.codigo = *codEmp;
-	(*codEmp)++;//Incrementa o numero de codEmp
+	dadosEmprestimo.codigo = codEmp;
 	
 	return dadosEmprestimo;
 }
@@ -629,24 +694,35 @@ struct Emprestimo realizarEmprestimo(FILE** listaDeEmprestimos, struct Emprestim
 	}	
 }
 
-int listarLivros(){//Função para listar os livros
+int listarLivros(int op){//Função para listar os livros
 
 	struct Livro livroAtual;
 	FILE *arquivo;
 	
 	arquivo = fopen("livros/listaDeLivros.dat", "rb");
 	
-	if (arquivo == NULL) {
+	if ((arquivo == NULL) || (get_size("livros/listaDeLivros.dat") == 0)) {
 		return 0;
 	}
-	desenhaCabecalho();
+	//desenhaCabecalho();
 	imprimeSubCabecalho(5);
-
-	while (fread(&livroAtual, sizeof(struct Livro), 1, arquivo))
-		if(livroAtual.deletado== ' '){//Verifica se está deletado
-			imprimeSubCabecalho(6);
-			printf(" %-1c %-30s %9.09i\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+	imprimeSubCabecalho(6);
+	
+	if(op == 1){
+		while (fread(&livroAtual, sizeof(struct Livro), 1, arquivo)){
+			if(livroAtual.deletado== ' '){//Verifica se está deletado
+				printf(" %-30s %9.09i\n", livroAtual.nome, livroAtual.codLivro);
+			}
 		}
+	}
+	
+	if(op == 2){
+		while (fread(&livroAtual, sizeof(struct Livro), 1, arquivo)){
+			if(livroAtual.deletado== '*'){//Verifica se está deletado
+				printf(" %-29s* %9.09i\n", livroAtual.nome, livroAtual.codLivro);
+			}
+		}
+	}
 	
 	printf("\n");
 	fclose(arquivo);
@@ -655,26 +731,34 @@ int listarLivros(){//Função para listar os livros
 
 }
 
-int listarLeitores(){//Função para listar os livros
+int listarLeitores(int op){//Função para listar os livros
 
 	struct Leitor leitorAtual;
 	FILE *arquivo;
 	
 	arquivo = fopen("leitores/listaDeLeitores.dat", "rb");
 	
-	if (arquivo == NULL) {
+	if (arquivo == NULL || (get_size("leitores/listaDeLeitores.dat") == 0)) {
 		return 0;
 	}
-	desenhaCabecalho();
+	//desenhaCabecalho();
 	imprimeSubCabecalho(2);
-
-	while (fread(&leitorAtual, sizeof(struct Leitor), 1, arquivo))
-		if(leitorAtual.deletado== ' '){//Verifica se está deletado
-			imprimeSubCabecalho(3);
-			printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+	imprimeSubCabecalho(3);
+	if(op == 1){
+		while (fread(&leitorAtual, sizeof(struct Leitor), 1, arquivo)){
+			if(leitorAtual.deletado== ' '){//Verifica se está deletado
+				printf(" %-30s %9.09i\n", leitorAtual.nome, leitorAtual.matricula);
+			}
 		}
+	}
 	
-	//imprimeSubCabecalho(12);
+	if(op == 2){
+		while (fread(&leitorAtual, sizeof(struct Leitor), 1, arquivo)){
+			if(leitorAtual.deletado== '*'){//Verifica se está deletado
+				printf(" %-29s* %9.09i\n", leitorAtual.nome, leitorAtual.matricula);
+			}
+		}
+	}
 	
 	printf("\n");
 	fclose(arquivo);
@@ -703,7 +787,7 @@ void realizarConsulta(int indice, FILE** listaAtual){
 			while(fread(&livroAtual, sizeof(struct Livro), 1, *listaAtual)){
 				if(livroAtual.codLivro == procurado && livroAtual.deletado == ' '){
 					if(achei == 0)imprimeSubCabecalho(6);
-					printf(" %-1c %-30s %9.09i\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+					printf(" %-30s %9.09i\n", livroAtual.nome, livroAtual.codLivro);
 					achei = 1;
 				}	
 			}
@@ -725,7 +809,7 @@ void realizarConsulta(int indice, FILE** listaAtual){
 			while(fread(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual)){
 				if(leitorAtual.matricula == procurado && leitorAtual.deletado == ' '){
 					if(achei == 0)imprimeSubCabecalho(3);
-					printf(" %-1c %-30s %9.09i\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+					printf(" %-30s %9.09i\n", leitorAtual.nome, leitorAtual.matricula);
 					achei = 1;
 				}	
 			}
@@ -750,7 +834,11 @@ void realizarConsulta(int indice, FILE** listaAtual){
 						printf("\n-------------------------------CONSULTAR EMPRESTIMO-----------------------------------\n");
 						imprimeSubCabecalho(8);
 					}
-					printf(" %3.03i %30s %9.09i %30s %9.09i\n", emprestimoAtual.codigo, emprestimoAtual.leitor, emprestimoAtual.matricula, emprestimoAtual.livroEmp, emprestimoAtual.codigoLivro);
+					printf(" %3.03i ", emprestimoAtual.codigo);
+					retornaNome(emprestimoAtual.matricula,  emprestimoAtual.codigoLivro, 2);
+					printf(" %9.09i ", emprestimoAtual.matricula);
+					retornaNome(emprestimoAtual.matricula,  emprestimoAtual.codigoLivro, 1);
+					printf(" %9.09i \n", emprestimoAtual.codigoLivro);
 					achei = 1;
 				}
 			}
@@ -791,14 +879,16 @@ void realizarAlteracao(int indice, FILE** listaAtual){
 					printf("-------------------\n\n");
 					achei = 1;
 					imprimeSubCabecalho(3);
-					printf(" %-1c %-30s %9.09i\n\n",livroAtual.deletado, livroAtual.nome, livroAtual.codLivro);
+					printf(" %-30s %9.09i\n\n", livroAtual.nome, livroAtual.codLivro);
 					printf(" DIGITE O NOVO NOME DO LIVRO:");
 					fflush(stdin);//Limpa o buffer do teclado
 					fgets(livroAtual.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 					livroAtual.nome[strlen(livroAtual.nome) - 1] = '\0';
-					fseek(*listaAtual, ((int)(sizeof(livroAtual) * (-1))), SEEK_CUR);//TA DANDO WARNING(QUERO SABER POQUE)
+					
+					fseek(*listaAtual, ((int)(sizeof(livroAtual) * (-1))), SEEK_CUR);
 					fwrite(&livroAtual, sizeof(struct Livro), 1, *listaAtual);
 					fseek(*listaAtual, 0, SEEK_CUR);
+					
 				}	
 			}
 			printf("\n\n");
@@ -824,11 +914,12 @@ void realizarAlteracao(int indice, FILE** listaAtual){
 					printf("------------------\n\n");
 					achei = 1;
 					imprimeSubCabecalho(3);
-					printf(" %-1c %-30s %9.09i\n\n",leitorAtual.deletado, leitorAtual.nome, leitorAtual.matricula);
+					printf(" %-30s %9.09i\n\n", leitorAtual.nome, leitorAtual.matricula);
 					printf(" DIGITE O NOVO NOME DO LEITOR:");
 					fflush(stdin);//Limpa o buffer do teclado
 					fgets(leitorAtual.nome,TS,stdin);//FAZ A LEITURA DE UMA STRING DIGITADA PELO USUÁRIO.
 					leitorAtual.nome[strlen(leitorAtual.nome) - 1] = '\0';
+						
 					fseek(*listaAtual, ((int)(sizeof(leitorAtual) * -1)), SEEK_CUR);//TA DANDO WARNING(QUERO SABER POQUE)
 					fwrite(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual);
 					fseek(*listaAtual, 0, SEEK_CUR);
@@ -846,7 +937,7 @@ void realizarAlteracao(int indice, FILE** listaAtual){
 	}
 }
 
-void realizarExclusao(int indice, FILE** listaAtual){
+void excluiRestaura(int indice, FILE** listaAtual, int op){
 	
 	//Cria um ponteiros para auxiliar na tarefa
 	struct Livro      livroAtual;
@@ -854,24 +945,38 @@ void realizarExclusao(int indice, FILE** listaAtual){
 	
 	//Cria um auxiliar de busca
 	int procurado, achei;
-
+	
 	LIMPA_TELA;
 	switch(indice){
 		case 1:
 			desenhaCabecalho();
-			printf("EXCLUSÃO DE LIVRO\n");
-			printf("-----------------\n\n");
+			if(op==0){
+				printf("EXCLUSÃO DE LIVRO\n");
+				printf("-----------------\n\n");
+				listarLivros(1);
+			}
+			if(op==1){
+				printf("RESTAURARAÇÃO DE LIVRO\n");
+				printf("----------------------\n\n");
+				listarLivros(2);
+			}
 			printf(" DIGITE O CODIGO DO LIVRO: ");
 			scanf("%i",&procurado);
 			LIMPA_TELA;
 			while(fread(&livroAtual, sizeof(struct Livro), 1, *listaAtual)){
-				if(livroAtual.codLivro == procurado && livroAtual.deletado == ' '){
+				if(livroAtual.codLivro == procurado){
 					desenhaCabecalho();//Chama a função que desenha o cabeçalho
+					if(op==0)
 					printf("EXCLUSÃO DE LIVRO\n");
-					printf("-----------------\n\n");
+					if(op==1)
+					printf("RESTAURARAÇÃO DE LIVRO\n");
+					printf("-----------------------\n\n");
 					achei = 1;
 					
+					if(livroAtual.deletado == ' ' && op == 0)
 					livroAtual.deletado = '*';
+					if(livroAtual.deletado == '*' && op == 1)
+					livroAtual.deletado = ' ';
 					
 					fseek(*listaAtual, ((int)(sizeof(livroAtual) * (-1))), SEEK_CUR);//TA DANDO WARNING(QUERO SABER POQUE)
 					fwrite(&livroAtual, sizeof(struct Livro), 1, *listaAtual);
@@ -882,7 +987,7 @@ void realizarExclusao(int indice, FILE** listaAtual){
 			if(!achei)
 				printf("CÓDIGO NÃO ENCONTRADO!");
 			else
-				printf("LIVRO MOVIDO PARA LIXEIRA!\n É POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
+				printf(" LIVRO MOVIDO PARA LIXEIRA!\n É POSSÍVEL RESTAURÁ-LO DEPOIS.\n\n");
 				
 			fclose(*listaAtual);
 			
@@ -890,19 +995,34 @@ void realizarExclusao(int indice, FILE** listaAtual){
 		
 		case 2:
 			desenhaCabecalho();
-			printf("EXCLUSÃO DE LEITOR\n");
-			printf("------------------\n\n");
+			if(op==0){
+				printf("EXCLUSÃO DE LEITORES\n");
+				printf("--------------------\n\n");
+				listarLeitores(1);
+			}
+			if(op==1){
+				printf("RESTAURARAÇÃO DE LEITORES\n");
+				printf("-------------------------\n\n");
+				listarLeitores(2);
+			}
 			printf(" DIGITE A MATRÍCULA DO LEITOR: ");
 			scanf("%i",&procurado);
 			LIMPA_TELA;
 			while(fread(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual)){
-				if(leitorAtual.matricula == procurado && leitorAtual.deletado == ' '){
+				if(leitorAtual.matricula == procurado){
 					desenhaCabecalho();//Chama a função que desenha o cabeçalho
+					if(op==0)
 					printf("EXCLUSÃO DE LEITOR\n");
-					printf("------------------\n\n");
+					if(op==1)
+					printf("RESTAURARAÇÃO DE LEITOR\n");
+					printf("-----------------------\n\n");
+					
 					achei = 1;
 					
+					if(leitorAtual.deletado == ' ' && op == 0)
 					leitorAtual.deletado = '*';
+					if(leitorAtual.deletado == '*' && op == 1)
+					leitorAtual.deletado = ' ';
 					
 					fseek(*listaAtual, ((int)(sizeof(leitorAtual) * -1)), SEEK_CUR);//TA DANDO WARNING(QUERO SABER POQUE)
 					fwrite(&leitorAtual, sizeof(struct Leitor), 1, *listaAtual);
@@ -922,6 +1042,73 @@ void realizarExclusao(int indice, FILE** listaAtual){
 	}
 }
 
+void limpaLixeira(void){
+	
+	struct Livro      livroAtual;
+	struct Leitor     leitorAtual;
+	
+	FILE *leitor, *leitorAux, *livro, *livroAux;
+	
+	livro = fopen("livros/listaDeLivros.dat", "rb");
+	livroAux = fopen("livros/listaDeLivros.edson", "wb");	
+	
+	leitor = fopen("leitores/listaDeLeitores.dat", "rb");
+	leitorAux = fopen("leitores/listaDeLeitores.edson", "wb");	
+	
+	if(leitor == NULL){
+		printf("ERRO DE ABERTURA DE ARQUIVO! Leitor\n");
+		return;
+	}
+	if(leitorAux == NULL){
+		printf("ERRO DE ABERTURA DE ARQUIVO! LeitorAux\n");
+		return;
+	}
+	if(livro == NULL){
+		printf("ERRO DE ABERTURA DE ARQUIVO! Livro\n");
+		return;
+	}
+	
+	if(leitorAux == NULL){
+		printf("ERRO DE ABERTURA DE ARQUIVO! LivroAux\n");
+		return;
+	}
+	
+	while(fread(&livroAtual, sizeof(struct Livro), 1, livro))
+		if(livroAtual.deletado == ' ')
+			fwrite(&livroAtual, sizeof(struct Livro), 1, livroAux);
+	
+	while(fread(&leitorAtual, sizeof(struct Livro),1, leitor))
+		if(leitorAtual.deletado == ' ')
+			fwrite(&leitorAtual, sizeof(struct Leitor), 1, leitorAux);
+			
+	fclose(livro);
+	fclose(livroAux);
+	
+	fclose(leitor);
+	fclose(leitorAux);	
+	
+	remove("livros/listaDeLivros.dat");
+	remove("leitores/listaDeLeitores.dat");
+	
+	rename("livros/listaDeLivros.edson", "livros/listaDeLivros.dat");
+	rename("leitores/listaDeLeitores.edson", "leitores/listaDeLeitores.dat");
+	
+	
+}
+
+int get_size(const char* file_name){
+    FILE *file = fopen(file_name, "r");
+
+    if(file == NULL)
+        return 0;
+
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+    fclose(file);
+
+    return size;
+}
+
 void imprimeSubCabecalho(int sessao){
 	switch(sessao){
 		case 1:// Cadastro de Leitores
@@ -935,8 +1122,8 @@ void imprimeSubCabecalho(int sessao){
 		break;
 		
 		case 3://Apresentação de Leitores
-			printf(" X LEITOR                         MATRÍCULA\n");
-			printf(" - ------------------------------ ---------\n");
+			printf(" LEITOR                         MATRÍCULA\n");
+			printf(" ------------------------------ ---------\n");
 		break;
 		
 		case 4:// Cadastro de Livros
@@ -950,8 +1137,8 @@ void imprimeSubCabecalho(int sessao){
 		break;
 		
 		case 6:///Apresentação de Livros
-			printf(" X LIVRO                          COD.LIVRO\n");
-			printf(" - ------------------------------ ---------\n");
+			printf(" LIVRO                          COD.LIVRO\n");
+			printf(" ------------------------------ ---------\n");
 		break;
 		
 		case 7://Realização de Empréstimo
@@ -989,6 +1176,11 @@ void imprimeSubCabecalho(int sessao){
 			printf("---ERRO: IMPOSSÍVEL LISTAR LIVROS---\n\n\n");
 			printf(" NENHUM LIVRO CADASTRADO ATE O MOMENTO!\n\n");
 			printf("\n\n");
+		break;
+		
+		case 14:
+			printf("LIXEIRA\n");
+			printf("-------\n\n");
 		break;
 	}
 }
